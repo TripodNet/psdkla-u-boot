@@ -348,6 +348,7 @@ struct omap_sys_ctrl_regs const omap5_ctrl = {
 	.control_emif1_sdram_config_ext		= 0x4AE0C144,
 	.control_emif2_sdram_config_ext		= 0x4AE0C148,
 	.control_wkup_ldovbb_mpu_voltage_ctrl	= 0x4AE0C318,
+	.control_wkup_ldovbb_mm_voltage_ctrl	= 0x4AE0C314,
 	.control_padconf_wkup_base		= 0x4AE0C800,
 	.control_smart1nopmio_padconf_0		= 0x4AE0CDA0,
 	.control_smart1nopmio_padconf_1		= 0x4AE0CDA4,
@@ -444,6 +445,9 @@ struct omap_sys_ctrl_regs const dra7xx_ctrl = {
 	.control_wkup_ldovbb_mpu_voltage_ctrl	= 0x4AE0C158,
 	.control_std_fuse_die_id_3		= 0x4AE0C210,
 	.control_std_fuse_prod_id_0		= 0x4AE0C214,
+	.control_wkup_ldovbb_iva_voltage_ctrl	= 0x4A002470,
+	.control_wkup_ldovbb_eve_voltage_ctrl	= 0x4A00246C,
+	.control_wkup_ldovbb_gpu_voltage_ctrl	= 0x4AE0C154,
 	.control_padconf_mode			= 0x4AE0C5A0,
 	.control_xtal_oscillator		= 0x4AE0C5A4,
 	.control_i2c_2				= 0x4AE0C5A8,
@@ -717,6 +721,7 @@ struct prcm_regs const omap5_es2_prcm = {
 	.cm_l3init_usb_otg_ss1_clkctrl = 0x4a0096f0,
 
 	/* prm irqstatus regs */
+	.prm_irqstatus_mpu = 0x4ae06010,
 	.prm_irqstatus_mpu_2 = 0x4ae06014,
 
 	/* l4 wkup regs */
@@ -746,6 +751,8 @@ struct prcm_regs const omap5_es2_prcm = {
 
 	.prm_abbldo_mpu_setup = 0x4ae07cdc,
 	.prm_abbldo_mpu_ctrl = 0x4ae07ce0,
+	.prm_abbldo_mm_setup = 0x4ae07ce4,
+	.prm_abbldo_mm_ctrl = 0x4ae07ce8,
 
 	/* SCRM stuff, used by some boards */
 	.scrm_auxclk0 = 0x4ae0a310,
@@ -831,6 +838,7 @@ struct prcm_regs const dra7xx_prcm = {
 	.cm_ipu_i2c5_clkctrl			= 0x4a005578,
 
 	/* prm irqstatus regs */
+	.prm_irqstatus_mpu			= 0x4ae06010,
 	.prm_irqstatus_mpu_2			= 0x4ae06014,
 
 	/* cm2.ckgen */
@@ -999,6 +1007,12 @@ struct prcm_regs const dra7xx_prcm = {
 
 	.prm_abbldo_mpu_setup			= 0x4AE07DDC,
 	.prm_abbldo_mpu_ctrl			= 0x4AE07DE0,
+	.prm_abbldo_iva_setup			= 0x4AE07E34,
+	.prm_abbldo_iva_ctrl			= 0x4AE07E24,
+	.prm_abbldo_eve_setup			= 0x4AE07E30,
+	.prm_abbldo_eve_ctrl			= 0x4AE07E20,
+	.prm_abbldo_gpu_setup			= 0x4AE07DE4,
+	.prm_abbldo_gpu_ctrl			= 0x4AE07DE8,
 
 	/*l3main1 edma*/
 	.cm_l3main1_tptc1_clkctrl		= 0x4a008778,

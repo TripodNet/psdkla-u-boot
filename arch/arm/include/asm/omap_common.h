@@ -243,6 +243,7 @@ struct prcm_regs {
 	u32 cm_l3init_usb_otg_ss1_clkctrl;
 	u32 cm_l3init_usb_otg_ss2_clkctrl;
 
+	u32 prm_irqstatus_mpu;
 	u32 prm_irqstatus_mpu_2;
 
 	/* cm2.l4per */
@@ -330,6 +331,14 @@ struct prcm_regs {
 	u32 prm_vc_cfg_i2c_clk;
 	u32 prm_abbldo_mpu_setup;
 	u32 prm_abbldo_mpu_ctrl;
+	u32 prm_abbldo_mm_setup;
+	u32 prm_abbldo_mm_ctrl;
+	u32 prm_abbldo_iva_setup;
+	u32 prm_abbldo_iva_ctrl;
+	u32 prm_abbldo_eve_setup;
+	u32 prm_abbldo_eve_ctrl;
+	u32 prm_abbldo_gpu_setup;
+	u32 prm_abbldo_gpu_ctrl;
 
 	u32 cm_div_m4_dpll_core;
 	u32 cm_div_m5_dpll_core;
@@ -449,6 +458,10 @@ struct omap_sys_ctrl_regs {
 	u32 control_emif1_sdram_config_ext;
 	u32 control_emif2_sdram_config_ext;
 	u32 control_wkup_ldovbb_mpu_voltage_ctrl;
+	u32 control_wkup_ldovbb_mm_voltage_ctrl;
+	u32 control_wkup_ldovbb_iva_voltage_ctrl;
+	u32 control_wkup_ldovbb_eve_voltage_ctrl;
+	u32 control_wkup_ldovbb_gpu_voltage_ctrl;
 	u32 control_smart1nopmio_padconf_0;
 	u32 control_smart1nopmio_padconf_1;
 	u32 control_padconf_mode;
@@ -548,6 +561,8 @@ struct volts {
 	u32 addr;
 	struct volts_efuse_data efuse;
 	struct pmic_data *pmic;
+
+	u32 abb_tx_done_mask;
 };
 
 struct vcores_data {
