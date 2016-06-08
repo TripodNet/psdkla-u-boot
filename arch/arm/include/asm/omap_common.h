@@ -563,7 +563,7 @@ struct volts {
 	struct pmic_data *pmic;
 
 	u32 abb_tx_done_mask;
-};
+}__packed;
 
 struct vcores_data {
 	struct volts mpu;
