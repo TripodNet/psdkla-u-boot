@@ -25,9 +25,11 @@
 #ifndef OMAP_MMC_H_
 #define OMAP_MMC_H_
 
-struct mmc_adma_desc_table {
-	u32 desc_length_attr;
-	u32 desc_addr;
+struct hsmmc_ipinfo {
+	unsigned int hl_rev;
+	unsigned int hl_hwinfo;
+	unsigned int hl_sysconfig;
+	unsigned char res0[0xf4];
 };
 
 struct hsmmc {
@@ -36,7 +38,9 @@ struct hsmmc {
 	unsigned int sysstatus;		/* 0x14 */
 	unsigned char res2[0x14];
 	unsigned int con;		/* 0x2C */
-	unsigned char res3[0xD4];
+	unsigned int pwcnt;		/* 0x30 */
+	unsigned int dll;		/* 0x34 */
+	unsigned char res3[0xcc];
 	unsigned int blk;		/* 0x104 */
 	unsigned int arg;		/* 0x108 */
 	unsigned int cmd;		/* 0x10C */
@@ -50,9 +54,11 @@ struct hsmmc {
 	unsigned int sysctl;		/* 0x12C */
 	unsigned int stat;		/* 0x130 */
 	unsigned int ie;		/* 0x134 */
-	unsigned char res4[0x8];
+	unsigned char res4[0x4];
+	unsigned int ac12;		/* 0x13C */
 	unsigned int capa;		/* 0x140 */
-	unsigned char res5[0x10];
+	unsigned int capa2;		/* 0x144 */
+	unsigned char res5[0xc];
 	unsigned int admaes;		/* 0x254 */
 	unsigned int admasal;		/* 0x258 */
 };
@@ -60,6 +66,7 @@ struct hsmmc {
 /*
  * OMAP HS MMC Bit definitions
  */
+#define MADMA_EN			(0x1 << 0)
 #define MMC_SOFTRESET			(0x1 << 1)
 #define RESETDONE			(0x1 << 0)
 #define NOOPENDRAIN			(0x0 << 0)
@@ -76,12 +83,13 @@ struct hsmmc {
 #define WPP_ACTIVEHIGH			(0x0 << 8)
 #define RESERVED_MASK			(0x3 << 9)
 #define CTPL_MMC_SD			(0x0 << 11)
+#define DDR				(0x1 << 19)
+#define DMA_MASTER			(0x1 << 20)
 #define BLEN_512BYTESLEN		(0x200 << 0)
 #define NBLK_STPCNT			(0x0 << 16)
-#define DE_DISABLE			(0x0 << 0)
-#define BCE_DISABLE			(0x0 << 1)
+#define DE_ENABLE			(0x1 << 0)
 #define BCE_ENABLE			(0x1 << 1)
-#define ACEN_DISABLE			(0x0 << 2)
+#define ACEN_ENABLE			(0x1 << 2)
 #define DDIR_OFFSET			(4)
 #define DDIR_MASK			(0x1 << 4)
 #define DDIR_WRITE			(0x0 << 4)
@@ -108,21 +116,22 @@ struct hsmmc {
 #define INDEX(i)			(i << 24)
 #define DATI_MASK			(0x1 << 1)
 #define CMDI_MASK			(0x1 << 0)
-#define CON_DDR                         (0x1 << 19)
 #define DTW_1_BITMODE			(0x0 << 1)
 #define DTW_4_BITMODE			(0x1 << 1)
 #define DTW_8_BITMODE                   (0x1 << 5) /* CON[DW8]*/
 #define SDBP_PWROFF			(0x0 << 8)
 #define SDBP_PWRON			(0x1 << 8)
+#define SDVS_MASK			(0x7 << 9)
 #define SDVS_1V8			(0x5 << 9)
 #define SDVS_3V0			(0x6 << 9)
+#define SDVS_3V3			(0x7 << 9)
+#define DMA_SELECT			(0x2 << 3)
 #define ICE_MASK			(0x1 << 0)
 #define ICE_STOP			(0x0 << 0)
 #define ICS_MASK			(0x1 << 1)
 #define ICS_NOTREADY			(0x0 << 1)
 #define ICE_OSCILLATE			(0x1 << 0)
 #define CEN_MASK			(0x1 << 2)
-#define CEN_DISABLE			(0x0 << 2)
 #define CEN_ENABLE			(0x1 << 2)
 #define CLKD_OFFSET			(6)
 #define CLKD_MASK			(0x3FF << 6)
@@ -148,134 +157,20 @@ struct hsmmc {
 #define IE_ADMAE			(0x01 << 25)
 #define IE_CERR				(0x01 << 28)
 #define IE_BADA				(0x01 << 29)
-#define MMCADMA_HCTL_DMAS_32BIT                (1 << 4)
-#define MMCADMA_CONN_DMA_MNS           (1 << 20)
-#define MMC_STAT_TC                    (1 << 1)
-#define MMC_STAT_CC                    (1 << 0)
-#define MMC_STAT_ERR                   (1 << 15)
-#define MMC_STAT_ADMAE                 (1 << 25)
 
-#define MMC_ADMA_MAX_XFER (60 * 1024)
-#define HSMMC_BLK_NBLK_MASK	0xFFFF0000
-#define HSMMC_BLK_NBLK_SHIFT	16
-
-/* Decriptor table defines */
-#define MMCADMA_DESC_TBL_VALID         (1 << 0)
-#define MMCADMA_DESC_TBL_END           (1 << 1)
-#define MMCADMA_DESC_TBL_INT           (1 << 2)
-#define MMCADMA_DESC_TBL_ACT1          (1 << 4)
-#define MMCADMA_DESC_TBL_ACT2          (1 << 5)
-
-/* MMC Command defines */
-#define MMCHS__MMCHS_CMD__CMD_TYPE__NORMAL	0x0
-#define MMCHS__MMCHS_CMD__CMD_TYPE		0xC00000
-#define MMCHS__MMCHS_CMD__RSP_TYPE__LGHT48	0x2
-#define MMCHS__MMCHS_CMD__RSP_TYPE		0x30000
-#define MMCHS__MMCHS_CMD__RSP_TYPE__POS		16
-#define MMCHS__MMCHS_CMD__CCCE__CHECK		0x1
-#define MMCHS__MMCHS_CMD__CCCE			0x80000
-#define MMCHS__MMCHS_CMD__CCCE__POS		19
-
-#define MMCHS_MMCHS_CMD_CCCE_CHECK		\
-				SET_FIELD(MMCHS__MMCHS_CMD__CCCE__CHECK, \
-						MMCHS__MMCHS_CMD__CCCE)
-
-#define MMCHS_MMCHS_CMD_RSP_TYPE_LGHT48		\
-				SET_FIELD(MMCHS__MMCHS_CMD__RSP_TYPE__LGHT48, \
-						MMCHS__MMCHS_CMD__RSP_TYPE)
-
-#define MMCHS__MMCHS_CMD__CICE			0x100000
-#define MMCHS__MMCHS_CMD__CICE__POS		20
-
-#define MMCHS__MMCHS_CMD__CICE__CHECK		0x1
-#define MMCHS_MMCHS_CMD_CICE_CHECK		\
-					SET_FIELD(MMCHS__MMCHS_CMD__CICE__CHECK, \
-							MMCHS__MMCHS_CMD__CICE)
-
-#define MMCSD_CMDRSP_TYPE_R1		(MMCHS_MMCHS_CMD_RSP_TYPE_LGHT48 | \
-					MMCHS_MMCHS_CMD_CCCE_CHECK | \
-					MMCHS_MMCHS_CMD_CICE_CHECK)
-
-#define MMCHS__MMCHS_CMD__BCE			0x2
-#define MMCHS__MMCHS_CMD__BCE__POS		1
-
-#define MMCHS__MMCHS_CMD__BCE__ENABLE		0x1
-#define MMCHS_MMCHS_CMD_BCE_ENABLE		\
-				SET_FIELD(MMCHS__MMCHS_CMD__BCE__ENABLE, \
-						MMCHS__MMCHS_CMD__BCE)
-
-#define MMCHS__MMCHS_CMD__MSBS			0x20
-#define MMCHS__MMCHS_CMD__MSBS__POS		5
-
-#define MMCHS__MMCHS_CMD__CMD_TYPE__POS		22
-
-#define MMCHS__MMCHS_CMD__MSBS__MULTIBLK	0x1
-#define MMCHS_MMCHS_CMD_MSBS_MULTIBLK \
-				SET_FIELD(MMCHS__MMCHS_CMD__MSBS__MULTIBLK, \
-						MMCHS__MMCHS_CMD__MSBS)
-
-#define MMCHS__MMCHS_CMD__DE			0x1
-#define MMCHS__MMCHS_CMD__DE__POS		0
-
-#define MMCHS__MMCHS_CMD__DE__ENABLE		0x1
-#define MMCHS_MMCHS_CMD_DE_ENABLE		\
-				SET_FIELD(MMCHS__MMCHS_CMD__DE__ENABLE, \
-						MMCHS__MMCHS_CMD__DE)
-
-#define MMCHS_MMCHS_CMD_CMD_TYPE_NORMAL		\
-				SET_FIELD(MMCHS__MMCHS_CMD__CMD_TYPE__NORMAL, \
-						MMCHS__MMCHS_CMD__CMD_TYPE)
-
-#define MMCSD_CMDTYPE_NORMAL		(MMCHS_MMCHS_CMD_CMD_TYPE_NORMAL)
-
-#define MMCHS__MMCHS_CMD__DP			0x200000
-#define MMCHS__MMCHS_CMD__DP__POS		21
-
-#define MMCHS__MMCHS_CMD__INDX			0x3F000000
-#define MMCHS__MMCHS_CMD__INDX__POS		24
-
-#define MMCHS__MMCHS_CMD__DP__DATA		0x1
-#define MMCHS_MMCHS_CMD_DP_DATA			\
-				SET_FIELD(MMCHS__MMCHS_CMD__DP__DATA, \
-						MMCHS__MMCHS_CMD__DP)
-
-#define MMCHS__MMCHS_CMD__DDIR			0x10
-#define MMCHS__MMCHS_CMD__DDIR__POS		4
-
-#define MMCHS__MMCHS_CMD__DDIR__WRITE		0x0
-#define MMCHS_MMCHS_CMD_DDIR_WRITE		\
-				SET_FIELD(MMCHS__MMCHS_CMD__DDIR__WRITE, \
-						MMCHS__MMCHS_CMD__DDIR)
-
-#define MMCHS__MMCHS_CMD__DDIR__READ		0x1
-#define MMCHS_MMCHS_CMD_DDIR_READ		\
-				SET_FIELD(MMCHS__MMCHS_CMD__DDIR__READ, \
-						MMCHS__MMCHS_CMD__DDIR)
-
-#define SET_FIELD(VAR, FIELD)			((VAR << FIELD##__POS) & FIELD)
-#define MMCHS__MMCHS_CMD__INDX			0x3F000000
-#define MMCSD_CMDINDEX(i)		SET_FIELD(i, MMCHS__MMCHS_CMD__INDX)
-#define MMCSD_CMDDP_DATA		(MMCHS_MMCHS_CMD_DP_DATA)
-
-#define MMCSD_CMDDIR_READ		(MMCHS_MMCHS_CMD_DDIR_READ)
-#define MMCHS__MMCHS_CMD__ACEN			0xC
-#define MMCHS__MMCHS_CMD__ACEN__POS		2
-
-#define MMCHS__MMCHS_CMD__ACEN__ENABLECMD12	0x1
-#define MMCHS_MMCHS_CMD_ACEN_ENABLECMD12 \
-				SET_FIELD(MMCHS__MMCHS_CMD__ACEN__ENABLECMD12, \
-						MMCHS__MMCHS_CMD__ACEN)
-
-
-#define MMCSD_CMD18			(MMCSD_CMDINDEX(18) |	\
-					MMCSD_CMDTYPE_NORMAL | \
-					MMCSD_CMDRSP_TYPE_R1 | \
-					MMCSD_CMDDP_DATA     | \
-					MMCSD_CMDDIR_READ)
-
-
+#define VS33_3V3SUP			(1 << 24)
 #define VS30_3V0SUP			(1 << 25)
 #define VS18_1V8SUP			(1 << 26)
+
+#define IOV_3V3				3300000
+#define IOV_3V0				3000000
+#define IOV_1V8				1800000
+
+#define AC12_V1V8_SIGEN		(1 << 19)
+#define AC12_SCLK_SEL		(1 << 23)
+#define AC12_UHSMC_MASK			(7 << 16)
+#define AC12_UHSMC_SDR104		(3 << 16)
+#define AC12_UHSMC_RES			(0x7 << 16)
 
 /* Driver definitions */
 #define MMCSD_SECTOR_SIZE		512
@@ -287,17 +182,54 @@ struct hsmmc {
 #define CLK_400KHZ			1
 #define CLK_MISC			2
 
+#define CLKD_MAX			0x3FF	/* max clock divisor: 1023 */
+
 #define RSP_TYPE_NONE	(RSP_TYPE_NORSP   | CCCE_NOCHECK | CICE_NOCHECK)
 #define MMC_CMD0	(INDEX(0)  | RSP_TYPE_NONE | DP_NO_DATA | DDIR_WRITE)
 
 /* Clock Configurations and Macros */
+#ifdef CONFIG_OMAP54XX
+#define MMC_CLOCK_REFERENCE	192 /* MHz */
+#else
 #define MMC_CLOCK_REFERENCE	96 /* MHz */
+#endif
+
+/* DLL */
+#define DLL_SWT			(1 << 20)
+#define DLL_FORCE_SR_C_SHIFT	13
+#define DLL_FORCE_SR_C_MASK	0x7f
+#define DLL_FORCE_VALUE		(1 << 12)
+#define DLL_CALIB		(1 << 1)
+
+#define MAX_PHASE_DELAY		0x7c
+
+/* CAPA2 */
+#define CAPA2_TSDR50		(1 << 13)
 
 #define mmc_reg_out(addr, mask, val)\
 	writel((readl(addr) & (~(mask))) | ((val) & (mask)), (addr))
 
+#define INT_EN_MASK (IE_BADA | IE_CERR | IE_DEB | IE_DCRC |\
+		IE_DTO | IE_CIE | IE_CEB | IE_CCRC | IE_ADMAE | IE_CTO |\
+		IE_BRR | IE_BWR | IE_TC | IE_CC)
+
+#ifdef CONFIG_IODELAY_RECALIBRATION
+struct omap_hsmmc_pinctrl_state {
+	struct pad_conf_entry *padconf;
+	int npads;
+	struct iodelay_cfg_entry *iodelay;
+	int niodelays;
+};
+#endif
+
 int omap_mmc_init(int dev_index, uint host_caps_mask, uint f_max, int cd_gpio,
 		int wp_gpio);
 
+int platform_fixup_disable_uhs_mode(void);
+
+#ifdef CONFIG_IODELAY_RECALIBRATION
+struct omap_hsmmc_pinctrl_state *platform_fixup_get_pinctrl_by_mode
+	(unsigned int dev_index, const char *mode);
+#endif
 
 #endif /* OMAP_MMC_H_ */
