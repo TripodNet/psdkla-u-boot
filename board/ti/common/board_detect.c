@@ -158,8 +158,10 @@ int __maybe_unused ti_i2c_eeprom_dra7_get(int bus_addr, int dev_addr)
 	struct ti_common_eeprom *ep;
 
 	ep = TI_EEPROM_DATA;
+#ifndef CONFIG_SPL_BUILD
 	if (ep->header == DRA7_EEPROM_HEADER_MAGIC)
 		goto already_read;
+#endif
 
 	/* Initialize with a known bad marker for i2c fails.. */
 	ep->header = 0xADEAD12C;
