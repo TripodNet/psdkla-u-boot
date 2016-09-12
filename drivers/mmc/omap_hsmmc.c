@@ -58,11 +58,7 @@
 #define ADMA_SUPPORT
 #endif
 
-#if !defined(CONFIG_SPL_BUILD) && !defined(CONFIG_MMC_NO_HIGH_SPEED)
-#define HIGH_SPEED_SUPPORT
-#endif
-
-#if defined(HIGH_SPEED_SUPPORT) && defined(CONFIG_IODELAY_RECALIBRATION)
+#if defined(CONFIG_IODELAY_RECALIBRATION)
 #define RECALIBRATE_IODELAY
 #endif
 
@@ -350,7 +346,6 @@ static void omap_hsmmc_set_timing(struct mmc *mmc)
 	priv->timing = mmc->timing;
 }
 
-#ifdef HIGH_SPEED_SUPPORT
 static void omap_hsmmc_disable_tuning(struct mmc *mmc)
 {
 	int val;
@@ -466,7 +461,6 @@ tuning_error:
 
 	return ret;
 }
-#endif
 
 static void omap_hsmmc_conf_bus_power(struct mmc *mmc)
 {
@@ -1166,9 +1160,7 @@ static const struct mmc_ops omap_hsmmc_ops = {
 	.getcd		= omap_hsmmc_getcd,
 	.getwp		= omap_hsmmc_getwp,
 #endif
-#ifdef HIGH_SPEED_SUPPORT
 	.execute_tuning = omap_hsmmc_execute_tuning,
-#endif
 };
 
 int omap_mmc_init(int dev_index, uint host_caps_mask, uint f_max, int cd_gpio,
