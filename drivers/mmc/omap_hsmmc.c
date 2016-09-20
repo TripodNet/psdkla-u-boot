@@ -112,7 +112,7 @@ struct omap_hsmmc_adma_desc {
 	u32 addr;
 };
 
-#define ADMA_MAX_LEN	63488
+#define ADMA_MAX_LEN	(65532)
 
 /* Decriptor table defines */
 #define ADMA_DESC_ATTR_VALID		BIT(0)
