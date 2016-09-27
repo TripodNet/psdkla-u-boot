@@ -33,6 +33,7 @@
 #include <remoteproc.h>
 #include <libfdt.h>
 #include <fdt_support.h>
+#include <miiphy.h>
 
 #include "mux_data.h"
 #include "../common/include/board_detect.h"
@@ -1221,6 +1222,11 @@ int board_eth_init(bd_t *bis)
 		cpsw_data.slave_data[0].phy_addr = 3;
 		pcf8575_output(PCF_ENET_MUX_ADDR, PCF_SEL_ENET_MUX_S0,
 			       PCF8575_OUT_LOW);
+	}
+
+	if (board_is_dra72x_revc_or_later()) {
+		cpsw_slaves[0].phy_if = PHY_INTERFACE_MODE_RGMII_ID;
+		cpsw_slaves[1].phy_if = PHY_INTERFACE_MODE_RGMII_ID;
 	}
 
 	ret = cpsw_register(&cpsw_data);
