@@ -34,6 +34,7 @@
 #include <libfdt.h>
 #include <fdt_support.h>
 #include <miiphy.h>
+#include <ti-dp83867.h>
 
 #include "mux_data.h"
 #include "../common/include/board_detect.h"
@@ -1188,6 +1189,17 @@ static struct cpsw_platform_data cpsw_data = {
 	.host_port_num		= 0,
 	.version		= CPSW_CTRL_VERSION_2,
 };
+
+
+void board_dp83867_init(struct dp83867_private *dp83867)
+{
+	if (board_is_dra72x_revc_or_later()) {
+		dp83867->rx_id_delay = DP83867_RGMIIDCTL_2_25_NS;
+		dp83867->tx_id_delay = DP83867_RGMIIDCTL_250_PS;
+		dp83867->fifo_depth = DP83867_PHYCR_FIFO_DEPTH_8_B_NIB;
+		dp83867->io_impedance = -DP83867_IO_MUX_CFG_IO_IMPEDANCE_MIN;
+	}
+}
 
 int board_eth_init(bd_t *bis)
 {
