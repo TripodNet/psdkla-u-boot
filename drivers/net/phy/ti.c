@@ -12,7 +12,7 @@
 
 #include <fdtdec.h>
 #include <dm.h>
-#include <dt-bindings/net/ti-dp83867.h>
+#include <ti-dp83867.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -88,16 +88,6 @@ DECLARE_GLOBAL_DATA_PTR;
 
 /* IO_MUX_CFG bits */
 #define DP83867_IO_MUX_CFG_IO_IMPEDANCE_CTRL	0x1f
-
-#define DP83867_IO_MUX_CFG_IO_IMPEDANCE_MAX	0x0
-#define DP83867_IO_MUX_CFG_IO_IMPEDANCE_MIN	0x1f
-
-struct dp83867_private {
-	int rx_id_delay;
-	int tx_id_delay;
-	int fifo_depth;
-	int io_impedance;
-};
 
 /**
  * phy_read_mmd_indirect - reads data from the MMD registers
@@ -197,14 +187,22 @@ static int dp83867_of_init(struct phy_device *phydev)
 	return 0;
 }
 #else
+__weak void board_dp83867_init(struct dp83867_private *dp83867)
+{
+}
+
 static int dp83867_of_init(struct phy_device *phydev)
 {
 	struct dp83867_private *dp83867 = phydev->priv;
 
+	// setup default values
 	dp83867->rx_id_delay = DEFAULT_RX_ID_DELAY;
 	dp83867->tx_id_delay = DEFAULT_TX_ID_DELAY;
 	dp83867->fifo_depth = DEFAULT_FIFO_DEPTH;
 	dp83867->io_impedance = -EINVAL;
+
+	// let the board code override the defaut value if it needs to
+	board_dp83867_init(dp83867);
 
 	return 0;
 }
