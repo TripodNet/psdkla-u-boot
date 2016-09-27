@@ -503,10 +503,14 @@ int board_late_init(void)
 	uint32_t serialno_lo, serialno_hi;
 	char *name = "unknown";
 
-	if (omap_revision() == DRA722_ES1_0)
-		name = "dra72x";
-	else
+	if (is_dra72x()) {
+		if (board_is_dra72x_revc_or_later())
+			name = "dra72x-revc";
+		else
+			name = "dra72x";
+	} else {
 		name = "dra7xx";
+	}
 
 	set_board_info_env(name);
 
