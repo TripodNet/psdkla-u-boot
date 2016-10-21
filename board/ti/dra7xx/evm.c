@@ -317,6 +317,78 @@ void emif_get_dmm_regs(const struct dmm_lisa_map_regs **dmm_lisa_regs)
 	}
 }
 
+struct vcores_data dra752_volts = {
+	.mpu.value	= VDD_MPU_DRA752,
+	.mpu.efuse.reg	= STD_FUSE_OPP_VMIN_MPU_NOM,
+	.mpu.efuse.reg_bits	= DRA752_EFUSE_REGBITS,
+	.mpu.addr	= TPS659038_REG_ADDR_SMPS12,
+	.mpu.pmic	= &tps659038,
+	.mpu.abb_tx_done_mask = OMAP_ABB_MPU_TXDONE_MASK,
+
+	.eve.value	= VDD_EVE_DRA752,
+	.eve.efuse.reg	= STD_FUSE_OPP_VMIN_DSPEVE_NOM,
+	.eve.efuse.reg_bits	= DRA752_EFUSE_REGBITS,
+	.eve.addr	= TPS659038_REG_ADDR_SMPS45,
+	.eve.pmic	= &tps659038,
+	.eve.abb_tx_done_mask = OMAP_ABB_EVE_TXDONE_MASK,
+
+	.gpu.value	= VDD_GPU_DRA752,
+	.gpu.efuse.reg	= STD_FUSE_OPP_VMIN_GPU_HIGH,
+	.gpu.efuse.reg_bits	= DRA752_EFUSE_REGBITS,
+	.gpu.addr	= TPS659038_REG_ADDR_SMPS6,
+	.gpu.pmic	= &tps659038,
+	.gpu.abb_tx_done_mask = OMAP_ABB_GPU_TXDONE_MASK,
+
+	.core.value	= VDD_CORE_DRA752,
+	.core.efuse.reg	= STD_FUSE_OPP_VMIN_CORE_NOM,
+	.core.efuse.reg_bits = DRA752_EFUSE_REGBITS,
+	.core.addr	= TPS659038_REG_ADDR_SMPS7,
+	.core.pmic	= &tps659038,
+
+	.iva.value	= VDD_IVA_DRA752,
+	.iva.efuse.reg	= STD_FUSE_OPP_VMIN_IVA_NOM,
+	.iva.efuse.reg_bits	= DRA752_EFUSE_REGBITS,
+	.iva.addr	= TPS659038_REG_ADDR_SMPS8,
+	.iva.pmic	= &tps659038,
+	.iva.abb_tx_done_mask = OMAP_ABB_IVA_TXDONE_MASK,
+};
+
+struct vcores_data dra722_volts = {
+	.mpu.value	= 1000,
+	.mpu.efuse.reg	= STD_FUSE_OPP_VMIN_MPU_NOM,
+	.mpu.efuse.reg_bits	= DRA752_EFUSE_REGBITS,
+	.mpu.addr	= 0x23,
+	.mpu.pmic	= &tps659038,
+	.mpu.abb_tx_done_mask = OMAP_ABB_MPU_TXDONE_MASK,
+
+	.eve.value	= 1000,
+	.eve.efuse.reg	= STD_FUSE_OPP_VMIN_DSPEVE_NOM,
+	.eve.efuse.reg_bits	= DRA752_EFUSE_REGBITS,
+	.eve.addr	= 0x2f,
+	.eve.pmic	= &tps659038,
+	.eve.abb_tx_done_mask = OMAP_ABB_EVE_TXDONE_MASK,
+
+	.gpu.value	= 1000,
+	.gpu.efuse.reg	= STD_FUSE_OPP_VMIN_GPU_NOM,
+	.gpu.efuse.reg_bits	= DRA752_EFUSE_REGBITS,
+	.gpu.addr	= 0x2f,
+	.gpu.pmic	= &tps659038,
+	.gpu.abb_tx_done_mask = OMAP_ABB_GPU_TXDONE_MASK,
+
+	.core.value	= 1000,
+	.core.efuse.reg	= STD_FUSE_OPP_VMIN_CORE_NOM,
+	.core.efuse.reg_bits = DRA752_EFUSE_REGBITS,
+	.core.addr	= 0x27,
+	.core.pmic	= &tps659038,
+
+	.iva.value	= 1000,
+	.iva.efuse.reg	= STD_FUSE_OPP_VMIN_IVA_NOM,
+	.iva.efuse.reg_bits	= DRA752_EFUSE_REGBITS,
+	.iva.addr	= 0x2f,
+	.iva.pmic	= &tps659038,
+	.iva.abb_tx_done_mask = OMAP_ABB_IVA_TXDONE_MASK,
+};
+
 static int fdt_addprop_aliases(void *fdt, char *node, char *propstr,
 	int *val, int len)
 {
@@ -574,6 +646,21 @@ void do_board_detect(void)
 			 "Board: %s REV %s\n", bname, board_ti_get_rev());
 }
 #endif	/* CONFIG_SPL_BUILD */
+
+void vcores_update(void)
+{
+	if (board_is_dra74x_evm()) {
+		*omap_vcores = &dra752_volts;
+	} else if (board_is_dra72x_evm()) {
+		*omap_vcores = &dra722_volts;
+	} else {
+		/* If EEPROM is not populated */
+		if (is_dra72x())
+			*omap_vcores = &dra722_volts;
+		else
+			*omap_vcores = &dra752_volts;
+	}
+}
 
 void set_muxconf_regs_essential(void)
 {

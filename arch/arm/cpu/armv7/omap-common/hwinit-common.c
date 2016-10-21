@@ -182,6 +182,7 @@ void s_init(void)
 	setup_clocks_for_console();
 	timer_init();
 	do_board_detect();
+	vcores_update();
 	prcm_init();
 #ifdef CONFIG_SPL_BUILD
 #ifdef CONFIG_BOARD_EARLY_INIT_F

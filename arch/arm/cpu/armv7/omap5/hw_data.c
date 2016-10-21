@@ -363,78 +363,6 @@ struct vcores_data omap5430_volts_es2 = {
 	.mm.abb_tx_done_mask = OMAP_ABB_MM_TXDONE_MASK,
 };
 
-struct vcores_data dra752_volts = {
-	.mpu.value	= VDD_MPU_DRA752,
-	.mpu.efuse.reg	= STD_FUSE_OPP_VMIN_MPU_NOM,
-	.mpu.efuse.reg_bits	= DRA752_EFUSE_REGBITS,
-	.mpu.addr	= TPS659038_REG_ADDR_SMPS12,
-	.mpu.pmic	= &tps659038,
-	.mpu.abb_tx_done_mask = OMAP_ABB_MPU_TXDONE_MASK,
-
-	.eve.value	= VDD_EVE_DRA752,
-	.eve.efuse.reg	= STD_FUSE_OPP_VMIN_DSPEVE_NOM,
-	.eve.efuse.reg_bits	= DRA752_EFUSE_REGBITS,
-	.eve.addr	= TPS659038_REG_ADDR_SMPS45,
-	.eve.pmic	= &tps659038,
-	.eve.abb_tx_done_mask = OMAP_ABB_EVE_TXDONE_MASK,
-
-	.gpu.value	= VDD_GPU_DRA752,
-	.gpu.efuse.reg	= STD_FUSE_OPP_VMIN_GPU_HIGH,
-	.gpu.efuse.reg_bits	= DRA752_EFUSE_REGBITS,
-	.gpu.addr	= TPS659038_REG_ADDR_SMPS6,
-	.gpu.pmic	= &tps659038,
-	.gpu.abb_tx_done_mask = OMAP_ABB_GPU_TXDONE_MASK,
-
-	.core.value	= VDD_CORE_DRA752,
-	.core.efuse.reg	= STD_FUSE_OPP_VMIN_CORE_NOM,
-	.core.efuse.reg_bits = DRA752_EFUSE_REGBITS,
-	.core.addr	= TPS659038_REG_ADDR_SMPS7,
-	.core.pmic	= &tps659038,
-
-	.iva.value	= VDD_IVA_DRA752,
-	.iva.efuse.reg	= STD_FUSE_OPP_VMIN_IVA_NOM,
-	.iva.efuse.reg_bits	= DRA752_EFUSE_REGBITS,
-	.iva.addr	= TPS659038_REG_ADDR_SMPS8,
-	.iva.pmic	= &tps659038,
-	.iva.abb_tx_done_mask = OMAP_ABB_IVA_TXDONE_MASK,
-};
-
-struct vcores_data dra722_volts = {
-	.mpu.value	= 1000,
-	.mpu.efuse.reg	= STD_FUSE_OPP_VMIN_MPU_NOM,
-	.mpu.efuse.reg_bits	= DRA752_EFUSE_REGBITS,
-	.mpu.addr	= 0x23,
-	.mpu.pmic	= &tps659038,
-	.mpu.abb_tx_done_mask = OMAP_ABB_MPU_TXDONE_MASK,
-
-	.eve.value	= 1000,
-	.eve.efuse.reg	= STD_FUSE_OPP_VMIN_DSPEVE_NOM,
-	.eve.efuse.reg_bits	= DRA752_EFUSE_REGBITS,
-	.eve.addr	= 0x2f,
-	.eve.pmic	= &tps659038,
-	.eve.abb_tx_done_mask = OMAP_ABB_EVE_TXDONE_MASK,
-
-	.gpu.value	= 1000,
-	.gpu.efuse.reg	= STD_FUSE_OPP_VMIN_GPU_NOM,
-	.gpu.efuse.reg_bits	= DRA752_EFUSE_REGBITS,
-	.gpu.addr	= 0x2f,
-	.gpu.pmic	= &tps659038,
-	.gpu.abb_tx_done_mask = OMAP_ABB_GPU_TXDONE_MASK,
-
-	.core.value	= 1000,
-	.core.efuse.reg	= STD_FUSE_OPP_VMIN_CORE_NOM,
-	.core.efuse.reg_bits = DRA752_EFUSE_REGBITS,
-	.core.addr	= 0x27,
-	.core.pmic	= &tps659038,
-
-	.iva.value	= 1000,
-	.iva.efuse.reg	= STD_FUSE_OPP_VMIN_IVA_NOM,
-	.iva.efuse.reg_bits	= DRA752_EFUSE_REGBITS,
-	.iva.addr	= 0x2f,
-	.iva.pmic	= &tps659038,
-	.iva.abb_tx_done_mask = OMAP_ABB_IVA_TXDONE_MASK,
-};
-
 /*
  * Enable essential clock domains, modules and
  * do some additional special settings needed
@@ -799,6 +727,10 @@ const struct ctrl_ioregs ioregs_dra72x_es2 = {
 	.ctrl_ddr_ctrl_ext_0 = 0xA2000000,
 };
 
+__weak void vcores_update(void)
+{
+}
+
 void __weak hw_data_init(void)
 {
 	u32 omap_rev = omap_revision();
@@ -826,7 +758,6 @@ void __weak hw_data_init(void)
 	case DRA752_ES2_0:
 	*prcm = &dra7xx_prcm;
 	*dplls_data = &dra7xx_dplls;
-	*omap_vcores = &dra752_volts;
 	*ctrl = &dra7xx_ctrl;
 	break;
 
@@ -834,7 +765,6 @@ void __weak hw_data_init(void)
 	case DRA722_ES2_0:
 	*prcm = &dra7xx_prcm;
 	*dplls_data = &dra72x_dplls;
-	*omap_vcores = &dra722_volts;
 	*ctrl = &dra7xx_ctrl;
 	break;
 
