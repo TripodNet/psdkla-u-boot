@@ -411,6 +411,7 @@ struct mmc *mmc_spi_init(uint bus, uint cs, uint speed, uint mode);
 int mmc_legacy_init(int verbose);
 #endif
 
+void board_mmc_power_init(void);
 int board_mmc_init(bd_t *bis);
 
 /* Set block count limit because of 16 bit register limit on some hardware*/
