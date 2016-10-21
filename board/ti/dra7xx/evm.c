@@ -1341,7 +1341,7 @@ static struct cpsw_platform_data cpsw_data = {
 
 void board_dp83867_init(struct dp83867_private *dp83867)
 {
-	if (board_is_dra72x_revc_or_later()) {
+	if (board_is_dra72x_revc_or_later() || board_is_dra71x_evm()) {
 		dp83867->rx_id_delay = DP83867_RGMIIDCTL_2_25_NS;
 		dp83867->tx_id_delay = DP83867_RGMIIDCTL_250_PS;
 		dp83867->fifo_depth = DP83867_PHYCR_FIFO_DEPTH_8_B_NIB;
@@ -1384,7 +1384,7 @@ int board_eth_init(bd_t *bis)
 			       PCF8575_OUT_LOW);
 	}
 
-	if (board_is_dra72x_revc_or_later()) {
+	if (board_is_dra72x_revc_or_later() || board_is_dra71x_evm()) {
 		cpsw_slaves[0].phy_if = PHY_INTERFACE_MODE_RGMII_ID;
 		cpsw_slaves[1].phy_if = PHY_INTERFACE_MODE_RGMII_ID;
 	}
