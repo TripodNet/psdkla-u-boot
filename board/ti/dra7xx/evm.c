@@ -61,6 +61,7 @@ DECLARE_GLOBAL_DATA_PTR;
 /* pcf chip address enet_mux_s0 */
 #define PCF8575_GPIO_EXP_ADDR	0x21
 #define PCF_SEL_ENET_MUX_S0	4
+#define PCF_SEL_MMC2_SELn	10
 
 #define SYSINFO_BOARD_NAME_MAX_LEN	37
 
@@ -808,6 +809,15 @@ err:
 int board_mmc_init(bd_t *bis)
 {
 	omap_mmc_init(0, 0, 0, -1, -1);
+
+	/*
+	 * On DRA71 evm the MMC2 signals are muxed on board with the GPMC.
+	 * To route the lines to the eMMC, the EMMC2_SELn must be tied low.
+	 */
+	if (board_is_dra71x_evm())
+		pcf8575_output(PCF8575_GPIO_EXP_ADDR, PCF_SEL_MMC2_SELn,
+			       PCF8575_OUT_LOW);
+
 	omap_mmc_init(1, 0, 0, -1, -1);
 	return 0;
 }
