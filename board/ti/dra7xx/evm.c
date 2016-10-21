@@ -59,7 +59,7 @@ DECLARE_GLOBAL_DATA_PTR;
 #define GPIO_DDR_VTT_EN 203
 
 /* pcf chip address enet_mux_s0 */
-#define PCF_ENET_MUX_ADDR	0x21
+#define PCF8575_GPIO_EXP_ADDR	0x21
 #define PCF_SEL_ENET_MUX_S0	4
 
 #define SYSINFO_BOARD_NAME_MAX_LEN	37
@@ -1380,7 +1380,7 @@ int board_eth_init(bd_t *bis)
 	if (*omap_si_rev == DRA722_ES1_0) {
 		cpsw_data.active_slave = 0;
 		cpsw_data.slave_data[0].phy_addr = 3;
-		pcf8575_output(PCF_ENET_MUX_ADDR, PCF_SEL_ENET_MUX_S0,
+		pcf8575_output(PCF8575_GPIO_EXP_ADDR, PCF_SEL_ENET_MUX_S0,
 			       PCF8575_OUT_LOW);
 	}
 
