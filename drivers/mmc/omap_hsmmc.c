@@ -158,7 +158,7 @@ static int omap_mmc_setup_gpio_in(int gpio, const char *label)
 }
 #endif
 
-#if defined(CONFIG_OMAP44XX) && defined(CONFIG_TWL6030_POWER)
+#if defined(CONFIG_OMAP44XX)
 static void omap4_vmmc_pbias_config(struct mmc *mmc)
 {
 	u32 value = 0;
@@ -166,8 +166,6 @@ static void omap4_vmmc_pbias_config(struct mmc *mmc)
 	value = readl((*ctrl)->control_pbiaslite);
 	value &= ~(MMC1_PBIASLITE_PWRDNZ | MMC1_PWRDNZ);
 	writel(value, (*ctrl)->control_pbiaslite);
-	twl6030_power_mmc_init(0);
-	twl6030_power_mmc_init(1);
 	value = readl((*ctrl)->control_pbiaslite);
 	value |= MMC1_PBIASLITE_VMODE | MMC1_PBIASLITE_PWRDNZ | MMC1_PWRDNZ;
 	writel(value, (*ctrl)->control_pbiaslite);
@@ -238,7 +236,7 @@ unsigned char mmc_board_init(struct mmc *mmc)
 		&prcm_base->iclken1_core);
 #endif
 
-#if defined(CONFIG_OMAP44XX) && defined(CONFIG_TWL6030_POWER)
+#if defined(CONFIG_OMAP44XX)
 	/* PBIAS config needed for MMC1 only */
 	if (mmc->block_dev.dev == 0)
 		omap4_vmmc_pbias_config(mmc);
