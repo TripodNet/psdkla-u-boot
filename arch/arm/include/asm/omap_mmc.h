@@ -232,4 +232,5 @@ struct omap_hsmmc_pinctrl_state *platform_fixup_get_pinctrl_by_mode
 	(unsigned int dev_index, const char *mode);
 #endif
 
+void vmmc_pbias_config(uint voltage);
 #endif /* OMAP_MMC_H_ */
