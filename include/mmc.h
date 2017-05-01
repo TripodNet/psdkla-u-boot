@@ -383,6 +383,13 @@ struct mmc_data {
 	uint blocksize;
 };
 
+struct mmc_statistics {
+	uint transfers;
+	uint errors;
+	uint total_sz;
+	uint total_time;
+};
+
 /* forward decl. */
 struct mmc;
 
@@ -542,6 +549,7 @@ struct mmc {
 #endif
 	char op_cond_pending;	/* 1 if we are waiting on an op_cond command */
 	char init_in_progress;	/* 1 if we have done mmc_start_init() */
+	uint host_ok_caps;	/* host caps that are not yet proven wrong */
 	char preinit;		/* start init as early as possible */
 	int ddr_mode;
 #ifdef CONFIG_DM_MMC
@@ -549,6 +557,8 @@ struct mmc {
 #endif
 	unsigned int sd_bus_speed;
 	unsigned int sd3_bus_mode;
+	struct mmc_statistics rd_stats;
+	struct mmc_statistics wr_stats;
 };
 
 struct mmc_hwpart_conf {

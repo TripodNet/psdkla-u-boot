@@ -10,9 +10,10 @@
 #include <common.h>
 #include <command.h>
 #include <mach/mon.h>
+#include <spl.h>
 asm(".arch_extension sec\n\t");
 
-int mon_install(u32 addr, u32 dpsc, u32 freq)
+int mon_install(u32 addr, u32 dpsc, u32 freq, u32 bm_addr)
 {
 	int result;
 
@@ -21,11 +22,12 @@ int mon_install(u32 addr, u32 dpsc, u32 freq)
 		"mov r0, %1\n"
 		"mov r1, %2\n"
 		"mov r2, %3\n"
+		"mov r3, %4\n"
 		"blx r0\n"
 		"ldmfd r13!, {lr}\n"
 		: "=&r" (result)
-		: "r" (addr), "r" (dpsc), "r" (freq)
-		: "cc", "r0", "r1", "r2", "memory");
+		: "r" (addr), "r" (dpsc), "r" (freq), "r" (bm_addr)
+		: "cc", "r0", "r1", "r2", "r3", "memory");
 	return result;
 }
 
@@ -64,6 +66,7 @@ int mon_power_off(int core_id)
 
 #ifdef CONFIG_TI_SECURE_DEVICE
 #define KS2_HS_SEC_HEADER_LEN	0x60
+#define KS2_HS_SEC_TAG_OFFSET	0x34
 #define KS2_AUTH_CMD		130
 
 /**
@@ -95,28 +98,40 @@ static int k2_hs_bm_auth(int cmd, void *arg1)
 	return  result;
 }
 
-static void k2_hs_auth(void *addr)
-{
-	int ret = 0;
-
-	ret = k2_hs_bm_auth(KS2_AUTH_CMD, addr);
-	if (ret == 0)
-		hang();
-}
-
 void board_fit_image_post_process(void **p_image, size_t *p_size)
 {
-	void *dst = *p_image;
-	void *src = dst + KS2_HS_SEC_HEADER_LEN;
+	int result = 0;
+	void *image = *p_image;
 
-	k2_hs_auth(*p_image);
+	if (strncmp(image + KS2_HS_SEC_TAG_OFFSET, "KEYS", 4)) {
+		printf("No signature found in image!\n");
+		hang();
+	}
+
+	result = k2_hs_bm_auth(KS2_AUTH_CMD, image);
+	if (result == 0) {
+		printf("Authentication failed!\n");
+		hang();
+	}
 
 	/*
-	* Overwrite the image headers  after authentication
+	* Overwrite the image headers after authentication
 	* and decryption. Update size to reflect removal
 	* of header.
 	*/
+	memcpy(image, image + KS2_HS_SEC_HEADER_LEN, *p_size);
 	*p_size -= KS2_HS_SEC_HEADER_LEN;
-	memcpy(dst, src, *p_size);
+
+	/*
+	 * Output notification of successful authentication to re-assure the
+	 * user that the secure code is being processed as expected. However
+	 * suppress any such log output in case of building for SPL and booting
+	 * via YMODEM. This is done to avoid disturbing the YMODEM serial
+	 * protocol transactions.
+	 */
+	if (!(IS_ENABLED(CONFIG_SPL_BUILD) &&
+	      IS_ENABLED(CONFIG_SPL_YMODEM_SUPPORT) &&
+	      spl_boot_device() == BOOT_DEVICE_UART))
+		printf("Authentication passed\n");
 }
 #endif

@@ -23,6 +23,7 @@
 	DEFAULT_MMC_TI_ARGS						\
 	DEFAULT_PMMC_BOOT_ENV						\
 	DEFAULT_FW_INITRAMFS_BOOT_ENV					\
+	DEFAULT_FIT_TI_ARGS						\
 	"boot=mmc\0"							\
 	"console=ttyS0,115200n8\0"					\
 	"bootpart=0:2\0"						\
@@ -51,11 +52,27 @@
 	"get_mon_mmc=load mmc ${bootpart} ${addr_mon} ${bootdir}/${name_mon}\0"\
 	"name_fs=arago-base-tisdk-image-k2g-evm.cpio\0"
 
+#ifndef CONFIG_TI_SECURE_DEVICE
 #define CONFIG_BOOTCOMMAND						\
+	"run findfdt; "							\
 	"run envboot; "							\
-	"run set_name_pmmc init_${boot} init_fw_rd_${boot} "		\
-	"get_pmmc_${boot} run_pmmc get_mon_${boot} run_mon "		\
-	"findfdt get_fdt_${boot} get_kern_${boot} run_kern"
+	"run init_${boot}; "						\
+	"run get_mon_${boot} run_mon; "					\
+	"run set_name_pmmc get_pmmc_${boot} run_pmmc; "			\
+	"run get_kern_${boot}; "					\
+	"run init_fw_rd_${boot}; "					\
+	"run get_fdt_${boot}; "						\
+	"run run_kern"
+#else
+#define CONFIG_BOOTCOMMAND						\
+	"run findfdt; "							\
+	"run envboot; "							\
+	"run run_mon_hs; "						\
+	"run init_${boot}; "						\
+	"run set_name_pmmc get_pmmc_${boot} run_pmmc; "			\
+	"run get_fit_${boot}; "						\
+	"bootm ${fit_loadaddr}#${name_fdt}"
+#endif
 
 #include <configs/ti_armv7_keystone2.h>
 
