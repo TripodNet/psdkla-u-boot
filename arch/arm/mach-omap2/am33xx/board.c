@@ -298,8 +298,6 @@ int board_early_init_f(void)
  */
 __weak void am33xx_spl_board_init(void)
 {
-	do_setup_dpll(&dpll_core_regs, &dpll_core_opp100);
-	do_setup_dpll(&dpll_mpu_regs, &dpll_mpu_opp100);
 }
 
 #if defined(CONFIG_SPL_AM33XX_ENABLE_RTC32K_OSC)
@@ -422,6 +420,14 @@ void early_system_init(void)
 	set_uart_mux_conf();
 	setup_early_clocks();
 	uart_soft_reset();
+#ifdef CONFIG_SPL_BUILD
+	/*
+	 * Save the boot parameters passed from romcode.
+	 * We cannot delay the saving further than this,
+	 * to prevent overwrites.
+	 */
+	save_omap_boot_params();
+#endif
 #ifdef CONFIG_TI_I2C_BOARD_DETECT
 	do_board_detect();
 #endif

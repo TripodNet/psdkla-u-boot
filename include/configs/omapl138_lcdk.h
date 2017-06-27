@@ -111,7 +111,7 @@
 	(7 << DV_DDR_SDTMR2_RASMAX_SHIFT)	| \
 	(2 << DV_DDR_SDTMR2_XP_SHIFT)		| \
 	(0 << DV_DDR_SDTMR2_ODT_SHIFT)		| \
-	(10 << DV_DDR_SDTMR2_XSNR_SHIFT)	| \
+	(20 << DV_DDR_SDTMR2_XSNR_SHIFT)	| \
 	(199 << DV_DDR_SDTMR2_XSRD_SHIFT)	| \
 	(1 << DV_DDR_SDTMR2_RTP_SHIFT)		| \
 	(2 << DV_DDR_SDTMR2_CKE_SHIFT))
@@ -310,6 +310,10 @@
 #define CONFIG_LZO
 #define CONFIG_RBTREE
 #define CONFIG_CMD_UBIFS
+#endif
+
+#ifdef CONFIG_CMD_FAT
+#define CONFIG_FAT_WRITE
 #endif
 
 #if !defined(CONFIG_USE_NAND) && \
