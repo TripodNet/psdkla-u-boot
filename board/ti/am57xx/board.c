@@ -221,11 +221,39 @@ static const u32 beagle_x15_emif2_ddr3_ext_phy_ctrl_const_regs[] = {
 	0x0
 };
 
+static const struct emif_regs am571x_emif1_ddr3_666mhz_emif_regs = {
+	.sdram_config_init		= 0x61863332,
+	.sdram_config			= 0x61863332,
+	.sdram_config2			= 0x08000000,
+	.ref_ctrl			= 0x0000514d,
+	.ref_ctrl_final			= 0x0000144a,
+	.sdram_tim1			= 0xd333887c,
+	.sdram_tim2			= 0x40b37fe3,
+	.sdram_tim3			= 0x409f8ada,
+	.read_idle_ctrl			= 0x00050000,
+	.zq_config			= 0x5007190b,
+	.temp_alert_config		= 0x00000000,
+	.emif_ddr_phy_ctlr_1_init	= 0x0024400f,
+	.emif_ddr_phy_ctlr_1		= 0x0e24400f,
+	.emif_ddr_ext_phy_ctrl_1	= 0x10040100,
+	.emif_ddr_ext_phy_ctrl_2	= 0x00910091,
+	.emif_ddr_ext_phy_ctrl_3	= 0x00950095,
+	.emif_ddr_ext_phy_ctrl_4	= 0x009b009b,
+	.emif_ddr_ext_phy_ctrl_5	= 0x009e009e,
+	.emif_rd_wr_lvl_rmp_win		= 0x00000000,
+	.emif_rd_wr_lvl_rmp_ctl		= 0x80000000,
+	.emif_rd_wr_lvl_ctl		= 0x00000000,
+	.emif_rd_wr_exec_thresh		= 0x00000305
+};
+
 void emif_get_reg_dump(u32 emif_nr, const struct emif_regs **regs)
 {
 	switch (emif_nr) {
 	case 1:
-		*regs = &beagle_x15_emif1_ddr3_532mhz_emif_regs;
+		if (board_is_am571x_idk())
+			*regs = &am571x_emif1_ddr3_666mhz_emif_regs;
+		else
+			*regs = &beagle_x15_emif1_ddr3_532mhz_emif_regs;
 		break;
 	case 2:
 		*regs = &beagle_x15_emif2_ddr3_532mhz_emif_regs;
@@ -509,7 +537,10 @@ void vcores_init(void)
 void hw_data_init(void)
 {
 	*prcm = &dra7xx_prcm;
-	*dplls_data = &dra7xx_dplls;
+	if (is_dra72x())
+		*dplls_data = &dra72x_dplls;
+	else
+		*dplls_data = &dra7xx_dplls;
 	*ctrl = &dra7xx_ctrl;
 }
 
@@ -722,6 +753,67 @@ int board_mmc_init(bd_t *bis)
 	omap_mmc_init(0, 0, 0, -1, -1);
 	omap_mmc_init(1, 0, 0, -1, -1);
 	return 0;
+}
+#endif
+
+#if defined(CONFIG_IODELAY_RECALIBRATION) && \
+	(defined(CONFIG_SPL_BUILD) || !defined(CONFIG_DM_MMC))
+
+struct pinctrl_desc {
+	const char *name;
+	struct omap_hsmmc_pinctrl_state *pinctrl;
+};
+
+static struct pinctrl_desc pinctrl_descs_hsmmc1[] = {
+	{"default", &hsmmc1_default},
+	{"hs", &hsmmc1_default},
+	{NULL}
+};
+
+static struct pinctrl_desc pinctrl_descs_hsmmc2_am572[] = {
+	{"default", &hsmmc2_default_hs},
+	{"hs", &hsmmc2_default_hs},
+	{"ddr_1_8v", &hsmmc2_ddr_am572},
+	{NULL}
+};
+
+static struct pinctrl_desc pinctrl_descs_hsmmc2_am571[] = {
+	{"default", &hsmmc2_default_hs},
+	{"hs", &hsmmc2_default_hs},
+	{"ddr_1_8v", &hsmmc2_ddr_am571},
+	{NULL}
+};
+
+struct omap_hsmmc_pinctrl_state *platform_fixup_get_pinctrl_by_mode
+				  (struct hsmmc *base, const char *mode)
+{
+	struct pinctrl_desc *p = NULL;
+
+	switch ((u32)&base->res1) {
+	case OMAP_HSMMC1_BASE:
+		p = pinctrl_descs_hsmmc1;
+		break;
+	case OMAP_HSMMC2_BASE:
+		if (is_dra72x())
+			p = pinctrl_descs_hsmmc2_am571;
+		else
+			p = pinctrl_descs_hsmmc2_am572;
+		break;
+	default:
+		break;
+	}
+
+	if (!p) {
+		printf("%s no pinctrl defined for MMC@%p\n", __func__,
+		       base);
+		return NULL;
+	}
+	while (p->name) {
+		if (strcmp(mode, p->name) == 0)
+			return p->pinctrl;
+		p++;
+	}
+	return NULL;
 }
 #endif
 
