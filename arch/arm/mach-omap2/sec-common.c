@@ -41,6 +41,9 @@
 #define PPA_SERV_HAL_SETUP_EMIF_FW_REGION   (PPA_HAL_SERVICES_START_INDEX + 26)
 #define PPA_SERV_HAL_LOCK_EMIF_FW           (PPA_HAL_SERVICES_START_INDEX + 27)
 
+/* Offset of header size if image is signed as ISW */
+#define HEADER_SIZE_OFFSET	(0x6D)
+
 int tee_loaded = 0;
 
 /* Argument for PPA_SERV_HAL_TEE_LOAD_MASTER */
@@ -110,8 +113,8 @@ int secure_boot_verify_image(void **image, size_t *size)
 
 	/* Perform cache writeback on input buffer */
 	flush_dcache_range(
-		(u32)*image,
-		(u32)*image + roundup(*size, ARCH_DMA_MINALIGN));
+		rounddown((u32)*image, ARCH_DMA_MINALIGN),
+		roundup((u32)*image + *size, ARCH_DMA_MINALIGN));
 
 	cert_addr = (uint32_t)*image;
 	sig_addr = find_sig_start((char *)*image, *size);
@@ -123,6 +126,9 @@ int secure_boot_verify_image(void **image, size_t *size)
 	}
 
 	*size = sig_addr - cert_addr;	/* Subtract out the signature size */
+	/* Subtract header if present */
+	if (strncmp((char *)sig_addr, "CERT_ISW_", 9) == 0)
+		*size = ((u32 *)*image)[HEADER_SIZE_OFFSET];
 	cert_size = *size;
 
 	/* Check if image load address is 32-bit aligned */
@@ -149,8 +155,8 @@ int secure_boot_verify_image(void **image, size_t *size)
 
 	/* Perform cache writeback on output buffer */
 	flush_dcache_range(
-		(u32)*image,
-		(u32)*image + roundup(*size, ARCH_DMA_MINALIGN));
+		rounddown((u32)*image, ARCH_DMA_MINALIGN),
+		roundup((u32)*image + *size, ARCH_DMA_MINALIGN));
 
 auth_exit:
 	if (result != 0) {
