@@ -36,11 +36,13 @@
 
 #define board_is_x15()		board_ti_is("BBRDX15_")
 #define board_is_x15_revb1()	(board_ti_is("BBRDX15_") && \
-				 (strncmp("B.10", board_ti_get_rev(), 3) <= 0))
+				 !strncmp("B.10", board_ti_get_rev(), 3))
+#define board_is_x15_revc()	(board_ti_is("BBRDX15_") && \
+				 !strncmp("C.00", board_ti_get_rev(), 3))
 #define board_is_am572x_evm()	board_ti_is("AM572PM_")
 #define board_is_am572x_evm_reva3()	\
 				(board_ti_is("AM572PM_") && \
-				 (strncmp("A.30", board_ti_get_rev(), 3) <= 0))
+				 !strncmp("A.30", board_ti_get_rev(), 3))
 #define board_is_am572x_idk()	board_ti_is("AM572IDK")
 #define board_is_am571x_idk()	board_ti_is("AM571IDK")
 
@@ -502,6 +504,8 @@ static void setup_board_eeprom_env(void)
 	if (board_is_x15()) {
 		if (board_is_x15_revb1())
 			name = "beagle_x15_revb1";
+		else if (board_is_x15_revc())
+			name = "beagle_x15_revc";
 		else
 			name = "beagle_x15";
 	} else if (board_is_am572x_evm()) {
@@ -711,7 +715,8 @@ void recalibrate_iodelay(void)
 
 	/* Now do the weird minor deltas that should be safe */
 	if (board_is_x15() || board_is_am572x_evm()) {
-		if (board_is_x15_revb1() || board_is_am572x_evm_reva3()) {
+		if (board_is_x15_revb1() || board_is_am572x_evm_reva3() ||
+		    board_is_x15_revc()) {
 			pconf = core_padconf_array_delta_x15_sr2_0;
 			pconf_sz = ARRAY_SIZE(core_padconf_array_delta_x15_sr2_0);
 		} else {
@@ -1122,6 +1127,9 @@ int board_fit_config_name_match(const char *name)
 	if (board_is_x15()) {
 		if (board_is_x15_revb1()) {
 			if (!strcmp(name, "am57xx-beagle-x15-revb1"))
+				return 0;
+		} else if (board_is_x15_revc()) {
+			if (!strcmp(name, "am57xx-beagle-x15-revc"))
 				return 0;
 		} else if (!strcmp(name, "am57xx-beagle-x15")) {
 			return 0;
