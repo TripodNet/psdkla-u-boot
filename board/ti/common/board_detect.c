@@ -10,9 +10,36 @@
 
 #include <common.h>
 #include <asm/omap_common.h>
+#include <dm/uclass.h>
 #include <i2c.h>
 
 #include "board_detect.h"
+
+#if defined(CONFIG_DM_I2C_COMPAT)
+int __maybe_unused ti_i2c_set_alen(int bus_addr, int dev_addr, int alen)
+{
+	struct udevice *dev;
+	struct udevice *bus;
+	int rc;
+
+	rc = uclass_get_device_by_seq(UCLASS_I2C, bus_addr, &bus);
+	if (rc)
+		return rc;
+	rc = i2c_get_chip(bus, dev_addr, 1, &dev);
+	if (rc)
+		return rc;
+	rc = i2c_set_chip_offset_len(dev, alen);
+	if (rc)
+		return rc;
+
+	return 0;
+}
+#else
+int __maybe_unused ti_i2c_set_alen(int bus_addr, int dev_addr, int alen)
+{
+	return 0;
+}
+#endif
 
 /**
  * ti_i2c_eeprom_init - Initialize an i2c bus and probe for a device
