@@ -25,6 +25,11 @@ static void omap_set_fastboot_cpu(void)
 	u32 cpu_rev = omap_revision();
 
 	switch (cpu_rev) {
+	case DRA762_ES1_0:
+	case DRA762_ABZ_ES1_0:
+	case DRA762_ACD_ES1_0:
+		cpu = "DRA762";
+		break;
 	case DRA752_ES1_0:
 	case DRA752_ES1_1:
 	case DRA752_ES2_0:
@@ -91,11 +96,10 @@ static u32 omap_mmc_get_part_size(const char *part)
 		return 0;
 	}
 
-	res = part_get_info_by_name(dev_desc, part, &info);
-	if (res < 0) {
-		error("cannot find partition: '%s'\n", part);
+	/* Check only for EFI (GPT) partition table */
+	res = part_get_info_by_name_type(dev_desc, part, &info, PART_TYPE_EFI);
+	if (res < 0)
 		return 0;
-	}
 
 	/* Calculate size in bytes */
 	sz = (info.size * (u64)info.blksz);
@@ -111,13 +115,10 @@ static void omap_set_fastboot_userdata_size(void)
 	u32 sz_kb;
 
 	sz_kb = omap_mmc_get_part_size("userdata");
-	if (sz_kb == 0) {
-		buf[0] = '\0';
-		printf("Warning: fastboot.userdata_size: unable to calc\n");
-	} else {
-		sprintf(buf, "%u", sz_kb);
-	}
+	if (sz_kb == 0)
+		return; /* probably it's not Android partition table */
 
+	sprintf(buf, "%u", sz_kb);
 	setenv("fastboot.userdata_size", buf);
 }
 #else
