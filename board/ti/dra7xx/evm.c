@@ -36,6 +36,7 @@
 
 #define board_is_dra76x_evm()		board_ti_is("DRA76/7x")
 #define board_is_dra74x_evm()		board_ti_is("5777xCPU")
+#define board_is_dra74x_cascadeevm()	board_ti_is("DRA74CAS")
 #define board_is_dra72x_evm()		board_ti_is("DRA72x-T")
 #define board_is_dra71x_evm()		board_ti_is("DRA79x,D")
 #define board_is_dra74x_revh_or_later() (board_is_dra74x_evm() &&	\
@@ -753,6 +754,8 @@ void do_board_detect(void)
 
 	if (board_is_dra74x_evm()) {
 		bname = "DRA74x EVM";
+	} else if (board_is_dra74x_cascadeevm()) {
+		bname = "DRA74x Cascade EVM";
 	} else if (board_is_dra72x_evm()) {
 		bname = "DRA72x EVM";
 	} else if (board_is_dra71x_evm()) {
@@ -776,6 +779,8 @@ void do_board_detect(void)
 void vcores_init(void)
 {
 	if (board_is_dra74x_evm()) {
+		*omap_vcores = &dra752_volts;
+	} else if (board_is_dra74x_cascadeevm()) {
 		*omap_vcores = &dra752_volts;
 	} else if (board_is_dra72x_evm()) {
 		*omap_vcores = &dra722_volts;
