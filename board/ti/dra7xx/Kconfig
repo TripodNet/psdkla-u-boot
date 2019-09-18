@@ -9,6 +9,9 @@ config SYS_VENDOR
 config SYS_CONFIG_NAME
 	default "dra7xx_evm"
 
+config TARGET_DRA7XX_EVM_VISION
+        bool "Vision daughter card support"
+
 source "board/ti/common/Kconfig"
 
 endif
