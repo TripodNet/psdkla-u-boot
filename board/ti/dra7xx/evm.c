@@ -988,6 +988,211 @@ const struct mmc_platform_fixups *platform_fixups_mmc(uint32_t addr)
 #endif
 
 #if defined(CONFIG_SPL_BUILD) && defined(CONFIG_SPL_OS_BOOT)
+
+#define L4_CFG_TARG                  0x4A000000
+
+#define CTRL_MODULE_CORE             (L4_CFG_TARG + 0x2000)
+#define CM_CORE_AON                  (L4_CFG_TARG + 0x5000)
+#define CM_CORE                      (L4_CFG_TARG + 0x8000)
+
+#define CAM_CM_CORE                  (CM_CORE + 0x1000)
+#define DSS_CM_CORE                  (CM_CORE + 0x1100)
+#define CORE_CM_CORE                 (CM_CORE + 0x700)
+#define L4PER_CM_CORE                (CM_CORE + 0x1700)
+#define VPE_CM_CORE_AON              (CM_CORE_AON + 0x760)
+#define IPU_CM_CORE_AON              (CM_CORE_AON + 0x500)
+
+#define CM_L3INSTR_L3_MAIN_2_CLKCTRL (CORE_CM_CORE + 0x728)
+#define CM_DSS_DSS_CLKCTRL           (DSS_CM_CORE + 0x20)
+#define CM_DSS_CLKSTCTRL             (DSS_CM_CORE + 0x00)
+#define CM_VPE_CLKSTCTRL             (VPE_CM_CORE_AON + 0x00)
+#define CM_IPU_CLKSTCTRL             (0x4a005540)
+#define CM_CAM_VIP1_CLKCTRL          (CAM_CM_CORE + 0x20)
+#define CM_CAM_VIP2_CLKCTRL          (CAM_CM_CORE + 0x28)
+#define CM_CAM_VIP3_CLKCTRL          (CAM_CM_CORE + 0x30)
+#define CM_VPE_VPE_CLKCTRL           (VPE_CM_CORE_AON + 0x04)
+
+#define CTRL_CORE_CONTROL_IO_2       (CTRL_MODULE_CORE + 0x558)
+
+#define CM_L4PER_I2C1_CLKCTRL        (L4PER_CM_CORE + 0xA0)
+#define CM_L4PER_I2C2_CLKCTRL        (L4PER_CM_CORE + 0xA8)
+#define CM_IPU_I2C5_CLKCTRL				(0x4A005578)
+
+#define CTRL_CORE_L3_INITIATOR_PRESSURE			(0x4A002454)
+#define CM_EVE3_CLKSTCTRL				(0x4A0056C0)
+#define CM_EVE3_EVE3_CLKCTRL				(0x4A0056E0)
+#define PM_EVE3_PWRSTCTRL				(0x4AE07BC0)
+#define RM_EVE3_RSTCTRL					(0x4AE07BD0)
+#define CM_CAM_CLKSTCTRL				(0x4A009000)
+
+void spl_enable_clocks_for_vsdk(void)
+{
+	uint32_t reg, i;
+
+	/* enable CORE domain transitions */
+	__raw_writel(0x2, CM_DSS_CLKSTCTRL);
+
+	/* enable power domain transitions (sw_wkup mode) */
+	__raw_writel(0x2, CM_VPE_CLKSTCTRL);
+
+	reg = __raw_readl(CM_L3INSTR_L3_MAIN_2_CLKCTRL);
+	__raw_writel((reg & ~0x00000003)|0x1, CM_L3INSTR_L3_MAIN_2_CLKCTRL);
+
+	/* enable DSS */
+	reg = __raw_readl(CTRL_CORE_CONTROL_IO_2);
+	__raw_writel((reg | 0x1), CTRL_CORE_CONTROL_IO_2);
+	reg = __raw_readl(CM_DSS_DSS_CLKCTRL);
+	__raw_writel(((reg & ~0x00000003) | 0x00003F00 | 0x2), CM_DSS_DSS_CLKCTRL);
+
+	/* checking if DSS is enabled */
+	while ((__raw_readl(CM_DSS_DSS_CLKCTRL) & 0x00030000) != 0);
+
+	/* Common for all platforms - VIP1, VPE, I2C1 */
+	reg = __raw_readl(CM_CAM_VIP1_CLKCTRL);
+	__raw_writel((reg & ~0x00000003)|0x1, CM_CAM_VIP1_CLKCTRL);
+	reg = __raw_readl(CM_VPE_VPE_CLKCTRL);
+	__raw_writel((reg & ~0x00000003)|0x1, CM_VPE_VPE_CLKCTRL);
+	reg = __raw_readl(CM_L4PER_I2C1_CLKCTRL);
+	__raw_writel((reg & ~0x00000003)|0x2, CM_L4PER_I2C1_CLKCTRL);
+
+	/* Enable VIP clocks */
+	if (is_dra7xx() || is_dra76x()) {
+
+		reg = __raw_readl(CM_CAM_VIP2_CLKCTRL);
+		__raw_writel((reg & ~0x00000003)|0x1, CM_CAM_VIP2_CLKCTRL);
+
+		if (is_dra7xx()) {
+			reg = __raw_readl(CM_CAM_VIP3_CLKCTRL);
+			__raw_writel((reg & ~0x00000003)|0x1, CM_CAM_VIP3_CLKCTRL);
+		}
+	}
+
+	/* Enable I25 clocks */
+	if (is_dra72x() || is_dra76x()) {
+
+		reg = __raw_readl(CM_IPU_CLKSTCTRL);
+		__raw_writel((reg & ~0x00000003)|0x2, CM_IPU_CLKSTCTRL);
+		reg = __raw_readl(CM_IPU_I2C5_CLKCTRL);
+		__raw_writel((reg & ~0x00000003)|0x2, CM_IPU_I2C5_CLKCTRL);
+		while (((__raw_readl(CM_IPU_CLKSTCTRL) & 0x2000) >> 13) != 1);
+	}
+
+	/* Enable ISS clocks */
+	if (is_dra76x()) {
+
+   /*
+    bit 25-20 need to be modified for different OPP modes
+    25-20 -> 5: 355 MHz for OPP_NOM at 20 MHz
+    25-20 -> 4: 425.6 MHz for OPP_OD at 20 MHz
+    25-20 -> 3: 532 MHz for OPP_HIGH & OPP_PLUS at 20 MHz
+   */
+
+		/* Register names are reused, they **actually** enable ISS */
+		__raw_writel(0x00400000, CTRL_CORE_L3_INITIATOR_PRESSURE);
+		__raw_writel(0x20400000, CTRL_CORE_L3_INITIATOR_PRESSURE);
+		__raw_writel(0x20400000, CTRL_CORE_L3_INITIATOR_PRESSURE);
+		__raw_writel(0x24400000, CTRL_CORE_L3_INITIATOR_PRESSURE);
+		__raw_writel(0x20400000, CTRL_CORE_L3_INITIATOR_PRESSURE);
+		__raw_writel(0x00400000, CTRL_CORE_L3_INITIATOR_PRESSURE);
+		__raw_writel(0x00400003, CTRL_CORE_L3_INITIATOR_PRESSURE);
+		__raw_writel(0x08400003, CTRL_CORE_L3_INITIATOR_PRESSURE);
+
+		__raw_writel(0x2, CM_EVE3_CLKSTCTRL);
+		for (i = 0; i < 100; i++) {
+			if ((__raw_readl(CM_EVE3_CLKSTCTRL) & 0x100) == 0)
+				break;
+			mdelay(1);
+		}
+		__raw_writel(0x1, CM_EVE3_EVE3_CLKCTRL);
+
+		__raw_writel(0x3, PM_EVE3_PWRSTCTRL);
+		__raw_writel(0x0, RM_EVE3_RSTCTRL);
+		for (i = 0; i < 100; i++) {
+			if ((__raw_readl(CM_EVE3_EVE3_CLKCTRL) & 0x30000) == 0)
+				break;
+			mdelay(1);
+		}
+	}
+
+	/* Enable CAL clocks */
+	if (is_dra72x() || is_dra76x()) {
+
+		__raw_writel(0x2, CM_CAM_CLKSTCTRL);
+		__raw_writel(0x1, CM_CAM_VIP3_CLKCTRL);
+		for (i = 0; i < 100; i++) {
+			if ((__raw_readl(CM_CAM_CLKSTCTRL) & 0x400) == 0)
+				break;
+			mdelay(1);
+		}
+	}
+}
+
+void spl_setup_board_muxes(void)
+{
+	uint8_t data[2];
+	struct udevice *dev;
+
+	if(is_dra72x()) {
+
+		/* Enable LCD power */
+		i2c_get_chip_for_busnum(0, 0x20, 0, &dev);
+		dm_i2c_read(dev, 0, data, 2);
+		data[1] &= ~(1 << 5); /* CON_LCD_PWR_DN */
+		dm_i2c_write(dev, 0, data, 2);
+
+		/*Select Vin1a betweeen GPMC and vout3*/
+		i2c_get_chip_for_busnum(0, 0x21, 0, &dev);
+		dm_i2c_read(dev, 0, data, 2);
+		data[0] |=  (1 << 0);  /* SEL_GPMC_AD_VID_S0 */
+		data[1] &= ~(1 << 7); /* SEL_GPMC_AD_VID_S2 */
+		dm_i2c_write(dev, 0, data, 2);
+
+		/*Select ethernet betweeen emac[0] and vin4b */
+		i2c_get_chip_for_busnum(0, 0x21, 0, &dev);
+		dm_i2c_read(dev, 0, data, 2);
+		data[0] |=  (1 << 4);  /* SEL_ENET_MUX_S0 */
+		dm_i2c_write(dev, 0, data, 2);
+
+		/*Select ethernet between emac[1] and vin2a[10-24]*/
+		i2c_get_chip_for_busnum(4, 0x26, 0, &dev);
+		dm_i2c_read(dev, 0, data, 2);
+		data[0] &= ~(1 << 1); /* EXVIN2_S0 */
+		data[1] &= ~(1 << 2); /* EXVIN2_S2 */
+		dm_i2c_write(dev, 0, data, 2);
+
+		/*Select vin2a between emac[0], onboard camera and vin2a[0:8] */
+		i2c_get_chip_for_busnum(4, 0x26, 0, &dev);
+		dm_i2c_read(dev, 0, data, 2);
+		data[0] &= ~(1 << 2); /* VIN2_S0 */
+		data[0] |=  (1 << 6); /* VIN2_S2 */
+		dm_i2c_write(dev, 0, data, 2);
+
+		/*Select vin2b between mmc3 and vin2b */
+		i2c_get_chip_for_busnum(4, 0x26, 0, &dev);
+		dm_i2c_read(dev, 0, data, 2);
+		data[1] &= ~(1 << 3); /* MMC3_SEL */
+		dm_i2c_write(dev, 0, data, 2);
+	}
+
+	if(is_dra76x()) {
+
+		/* enale vin3a */
+		i2c_get_chip_for_busnum(0, 0x26, 0, &dev);
+		dm_i2c_read(dev, 0, data, 2);
+                data[1] &= ~(1 << 1);   /* EXVIN2_S0 */
+		data[1] |=  (1 << 2 );  /* EXVIN2_S2 */
+		dm_i2c_write(dev, 0, data, 2);
+
+		/* enale vin2a */
+		i2c_get_chip_for_busnum(0, 0x26, 0, &dev);
+		dm_i2c_read(dev, 0, data, 2);
+                data[0] &= ~(1 << 2); /* VIN2_S0 */
+		data[0] |=  (1 << 6); /* VIN2_S2 */
+		dm_i2c_write(dev, 0, data, 2);
+	}
+}
+
+
 int spl_start_uboot(void)
 {
 	/* break into full u-boot on 'c' */

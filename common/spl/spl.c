@@ -647,6 +647,10 @@ void board_init_r(gd_t *dummy1, ulong dummy2)
 	cleanup_before_linux();
 #endif
 
+	/* Setup clocks and board muxes specific to the board/usecase */
+	spl_enable_clocks_for_vsdk();
+	spl_setup_board_muxes();
+
 	switch (spl_image.os) {
 	case IH_OS_U_BOOT:
 		debug("Jumping to U-Boot\n");
