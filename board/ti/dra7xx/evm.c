@@ -713,6 +713,11 @@ int board_late_init(void)
 	omap_die_id_serial();
 	omap_set_fastboot_vars();
 
+	if (board_is_dra74x_cascadeevm()) {
+		/* Enable PCIe Clockout */
+		volatile unsigned int *CTRL_CORE_SMA_SW_6 = (volatile unsigned int *)0x4A003C14;
+		*CTRL_CORE_SMA_SW_6 = ((*CTRL_CORE_SMA_SW_6) & ~0x30000) | 0x10000;
+	}
 	/*
 	 * Hook the LDO1 regulator to EN pin. This applies only to LP8733
 	 * Rest all regulators are hooked to EN Pin at reset.
