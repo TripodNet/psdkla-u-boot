@@ -1284,6 +1284,97 @@ const struct iodelay_cfg_entry dra742_es2_0_iodelay_cfg_array[] = {
 
 };
 
+const struct iodelay_cfg_entry dra742_es2_0_cascadeevm_iodelay_cfg_array[] = {
+    {0x714, 139, 1081}, /* GMAC0 - rgmii0_rxd1 on Y2 - MyGMAC_SW01 */
+    {0x720, 195, 1100}, /* GMAC0 - rgmii0_rxd2 on V3 - MyGMAC_SW01 */
+    {0x72C, 239, 1216}, /* GMAC0 - rgmii0_rxd3 on V4 - MyGMAC_SW01 */
+    {0x708, 123, 1047}, /* GMAC0 - rgmii0_rxd0 on W2 - MyGMAC_SW01 */
+    {0x0, 0, 0}, /* GMAC0 - rgmii0_txd0 on U6 - MyGMAC_SW01 */
+    {0x0, 0, 0}, /* GMAC0 - rgmii0_txd1 on V6 - MyGMAC_SW01 */
+    {0x0, 0, 0}, /* GMAC0 - rgmii0_txd2 on U7 - MyGMAC_SW01 */
+    {0x0, 0, 0}, /* GMAC0 - rgmii0_txd3 on V7 - MyGMAC_SW01 */
+    {0x0, 0, 0}, /* GMAC0 - rgmii0_txc on W9 - MyGMAC_SW01 */
+    {0x0, 0, 0}, /* GMAC0 - rgmii0_txctl on V9 - MyGMAC_SW01 */
+    {0x6F0, 260, 0}, /* GMAC0 - rgmii0_rxc on U5 - MyGMAC_SW01 */
+    {0x6FC, 0, 1412}, /* GMAC0 - rgmii0_rxctl on V5 - MyGMAC_SW01 */
+    {0x8D0, 0, 0}, /* VIN1A - vin1a_clk0 on AG8 - MyVIN1 */
+    {0x9FC, 1926, 728}, /* VIN1A - vin1a_de0 on AD9 - MyVIN1 */
+    {0xA20, 1926, 987}, /* VIN1A - vin1a_vsync0 on AF8 - MyVIN1 */
+    {0x8DC, 2105, 619}, /* VIN1A - vin1a_d0 on AE8 - MyVIN1 */
+    {0x960, 2017, 757}, /* VIN1A - vin1a_d1 on AD8 - MyVIN1 */
+    {0x99C, 1996, 962}, /* VIN1A - vin1a_d2 on AG7 - MyVIN1 */
+    {0x9A8, 1993, 901}, /* VIN1A - vin1a_d3 on AH6 - MyVIN1 */
+    {0x9B4, 2098, 499}, /* VIN1A - vin1a_d4 on AH3 - MyVIN1 */
+    {0x9C0, 2038, 844}, /* VIN1A - vin1a_d5 on AH5 - MyVIN1 */
+    {0x9CC, 2002, 863}, /* VIN1A - vin1a_d6 on AG6 - MyVIN1 */
+    {0x9D8, 2063, 873}, /* VIN1A - vin1a_d7 on AH4 - MyVIN1 */
+    {0x9E4, 2088, 759}, /* VIN1A - vin1a_d8 on AG4 - MyVIN1 */
+    {0x9F0, 2152, 701}, /* VIN1A - vin1a_d9 on AG2 - MyVIN1 */
+    {0x8E8, 2107, 739}, /* VIN1A - vin1a_d10 on AG3 - MyVIN1 */
+    {0x8F4, 2005, 788}, /* VIN1A - vin1a_d11 on AG5 - MyVIN1 */
+    {0x900, 2059, 1297}, /* VIN1A - vin1a_d12 on AF2 - MyVIN1 */
+    {0x90C, 2027, 1141}, /* VIN1A - vin1a_d13 on AF6 - MyVIN1 */
+    {0x918, 2071, 1332}, /* VIN1A - vin1a_d14 on AF3 - MyVIN1 */
+    {0x924, 1995, 1764}, /* VIN1A - vin1a_d15 on AF4 - MyVIN1 */
+    {0xA38, 0, 0}, /* VIN2A - vin2a_clk0 on E1 - MyVIN2 */
+    {0xB64, 2036, 213}, /* VIN2A - vin2a_de0 on G2 - MyVIN2 */
+    {0xB88, 1895, 53}, /* VIN2A - vin2a_vsync0 on G6 - MyVIN2 */
+    {0xA44, 2009, 147}, /* VIN2A - vin2a_d0 on F2 - MyVIN2 */
+    {0xAC8, 2015, 561}, /* VIN2A - vin2a_d1 on F3 - MyVIN2 */
+    {0xB04, 2021, 0}, /* VIN2A - vin2a_d2 on D1 - MyVIN2 */
+    {0xB10, 2142, 492}, /* VIN2A - vin2a_d3 on E2 - MyVIN2 */
+    {0xB1C, 2071, 0}, /* VIN2A - vin2a_d4 on D2 - MyVIN2 */
+    {0xB28, 2155, 461}, /* VIN2A - vin2a_d5 on F4 - MyVIN2 */
+    {0xB34, 1849, 0}, /* VIN2A - vin2a_d6 on C1 - MyVIN2 */
+    {0xB40, 1977, 192}, /* VIN2A - vin2a_d7 on E4 - MyVIN2 */
+    {0xB4C, 1966, 391}, /* VIN2A - vin2a_d8 on F5 - MyVIN2 */
+    {0xB58, 1996, 270}, /* VIN2A - vin2a_d9 on E6 - MyVIN2 */
+    {0xA50, 2021, 377}, /* VIN2A - vin2a_d10 on D3 - MyVIN2 */
+    {0xA5C, 1940, 19}, /* VIN2A - vin2a_d11 on F6 - MyVIN2 */
+    {0xA68, 1895, 181}, /* VIN2A - vin2a_d12 on D5 - MyVIN2 */
+    {0xA74, 2063, 15}, /* VIN2A - vin2a_d13 on C2 - MyVIN2 */
+    {0xA80, 1709, 0}, /* VIN2A - vin2a_d14 on C3 - MyVIN2 */
+    {0xA8C, 1899, 369}, /* VIN2A - vin2a_d15 on C4 - MyVIN2 */
+    {0x378, 0, 0}, /* VIN3A - vin3a_clk0 on P1 - MyVIN3 */
+    {0x120, 2108, 823}, /* VIN3A - vin3a_de0 on N9 - MyVIN3 */
+    {0x258, 2185, 1152}, /* VIN3A - vin3a_vsync0 on R4 - MyVIN3 */
+    {0x264, 1908, 620}, /* VIN3A - vin3a_d0 on M6 - MyVIN3 */
+    {0x2B8, 2117, 382}, /* VIN3A - vin3a_d1 on M2 - MyVIN3 */
+    {0x2C4, 2097, 666}, /* VIN3A - vin3a_d2 on L5 - MyVIN3 */
+    {0x2D0, 1954, 581}, /* VIN3A - vin3a_d3 on M1 - MyVIN3 */
+    {0x2DC, 2034, 610}, /* VIN3A - vin3a_d4 on L6 - MyVIN3 */
+    {0x2E8, 1965, 484}, /* VIN3A - vin3a_d5 on L4 - MyVIN3 */
+    {0x2F4, 1861, 635}, /* VIN3A - vin3a_d6 on L3 - MyVIN3 */
+    {0x300, 2004, 507}, /* VIN3A - vin3a_d7 on L2 - MyVIN3 */
+    {0x30C, 1945, 853}, /* VIN3A - vin3a_d8 on L1 - MyVIN3 */
+    {0x318, 1914, 539}, /* VIN3A - vin3a_d9 on K2 - MyVIN3 */
+    {0x270, 1968, 686}, /* VIN3A - vin3a_d10 on J1 - MyVIN3 */
+    {0x27C, 1853, 689}, /* VIN3A - vin3a_d11 on J2 - MyVIN3 */
+    {0x288, 1910, 497}, /* VIN3A - vin3a_d12 on H1 - MyVIN3 */
+    {0x294, 1869, 436}, /* VIN3A - vin3a_d13 on J3 - MyVIN3 */
+    {0x2A0, 1895, 147}, /* VIN3A - vin3a_d14 on H2 - MyVIN3 */
+    {0x2AC, 1917, 655}, /* VIN3A - vin3a_d15 on H3 - MyVIN3 */
+    {0xD08, 0, 0}, /* VIN4A - vin4a_clk0 on B26 - MyVIN4 */
+    {0xD14, 1183, 0}, /* VIN4A - vin4a_de0 on C23 - MyVIN4 */
+    {0xFC, 1321, 0}, /* VIN4A - vin4a_vsync0 on F20 - MyVIN4 */
+    {0x3A8, 1990, 0}, /* VIN4A - vin4a_d0 on B14 - MyVIN4 */
+    {0x480, 2248, 44}, /* VIN4A - vin4a_d1 on J14 - MyVIN4 */
+    {0x420, 2423, 1073}, /* VIN4A - vin4a_d2 on G13 - MyVIN4 */
+    {0x42C, 2573, 696}, /* VIN4A - vin4a_d3 on J11 - MyVIN4 */
+    {0x438, 2441, 773}, /* VIN4A - vin4a_d4 on E12 - MyVIN4 */
+    {0x444, 2430, 799}, /* VIN4A - vin4a_d5 on F13 - MyVIN4 */
+    {0x450, 2539, 480}, /* VIN4A - vin4a_d6 on C12 - MyVIN4 */
+    {0x45C, 2421, 932}, /* VIN4A - vin4a_d7 on D12 - MyVIN4 */
+    {0x498, 1795, 0}, /* VIN4A - vin4a_d8 on E15 - MyVIN4 */
+    {0x510, 1713, 0}, /* VIN4A - vin4a_d9 on A20 - MyVIN4 */
+    {0x4B0, 2113, 554}, /* VIN4A - vin4a_d10 on B15 - MyVIN4 */
+    {0x4BC, 2279, 212}, /* VIN4A - vin4a_d11 on A15 - MyVIN4 */
+    {0x4E0, 2299, 206}, /* VIN4A - vin4a_d12 on D15 - MyVIN4 */
+    {0x4EC, 2179, 230}, /* VIN4A - vin4a_d13 on B16 - MyVIN4 */
+    {0x4F8, 1354, 0}, /* VIN4A - vin4a_d14 on B17 - MyVIN4 */
+    {0x504, 1777, 243}, /* VIN4A - vin4a_d15 on A17 - MyVIN4 */
+};
+
 const struct iodelay_cfg_entry dra76x_es1_0_iodelay_cfg_array[] = {
 	{0x011C, 787, 0},	/* CFG_GPMC_A0_OUT */
 	{0x0128, 1181, 0},	/* CFG_GPMC_A10_OUT */
