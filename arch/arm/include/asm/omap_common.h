@@ -550,6 +550,7 @@ enum {
 	OPP_NOM,
 	OPP_OD,
 	OPP_HIGH,
+	OPP_PLUS,
 	NUM_OPPS,
 };
 

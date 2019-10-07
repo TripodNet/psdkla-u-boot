@@ -155,6 +155,10 @@ config DRA7_GPU_OPP_HIGH
 	help
 	  This config option enables High OPP for GPU.
 
+config DRA7_GPU_OPP_PLUS
+	bool "OPP PLUS"
+	help
+	  This config option enables OPP Plus for GPU.
 endchoice
 
 endmenu

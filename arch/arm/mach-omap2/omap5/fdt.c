@@ -186,6 +186,7 @@ u32 dra7_opp_dsp_clk_rates[NUM_OPPS][OPP_DSP_CLK_NUM] = {
 	{600000000, 600000000, 400000000}, /* OPP_NOM */
 	{700000000, 700000000, 466666667}, /* OPP_OD */
 	{750000000, 750000000, 500000000}, /* OPP_HIGH */
+	{}, /* OPP_PLUS */
 };
 
 /* IVA voltage domain */
@@ -194,6 +195,7 @@ u32 dra7_opp_iva_clk_rates[NUM_OPPS][OPP_IVA_CLK_NUM] = {
 	{1165000000, 388333334}, /* OPP_NOM */
 	{860000000, 430000000}, /* OPP_OD */
 	{1064000000, 532000000}, /* OPP_HIGH */
+	{}, /* OPP_PLUS */
 };
 
 /* GPU voltage domain */
@@ -202,6 +204,7 @@ u32 dra7_opp_gpu_clk_rates[NUM_OPPS][OPP_GPU_CLK_NUM] = {
 	{1277000000, 425666667}, /* OPP_NOM */
 	{1000000000, 500000000}, /* OPP_OD */
 	{1064000000, 532000000}, /* OPP_HIGH */
+	{1330000000, 665000000}, /* OPP_PLUS */
 };
 
 static int ft_fixup_clocks(void *fdt, const char **names, u32 *rates, int num)

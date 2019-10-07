@@ -400,9 +400,11 @@ struct vcores_data dra752_volts = {
 	.gpu.value[OPP_NOM]	= VDD_GPU_DRA7_NOM,
 	.gpu.value[OPP_OD]	= VDD_GPU_DRA7_OD,
 	.gpu.value[OPP_HIGH]	= VDD_GPU_DRA7_HIGH,
+	.gpu.value[OPP_PLUS]	= VDD_GPU_DRA7_PLUS,
 	.gpu.efuse.reg[OPP_NOM]	= STD_FUSE_OPP_VMIN_GPU_NOM,
 	.gpu.efuse.reg[OPP_OD]	= STD_FUSE_OPP_VMIN_GPU_OD,
 	.gpu.efuse.reg[OPP_HIGH]	= STD_FUSE_OPP_VMIN_GPU_HIGH,
+	.gpu.efuse.reg[OPP_PLUS]	= STD_FUSE_OPP_VMIN_GPU_PLUS,
 	.gpu.efuse.reg_bits	= DRA752_EFUSE_REGBITS,
 	.gpu.addr	= TPS659038_REG_ADDR_SMPS6,
 	.gpu.pmic	= &tps659038,
@@ -448,9 +450,11 @@ struct vcores_data dra76x_volts = {
 	.gpu.value[OPP_NOM]	= VDD_GPU_DRA7_NOM,
 	.gpu.value[OPP_OD]	= VDD_GPU_DRA7_OD,
 	.gpu.value[OPP_HIGH]	= VDD_GPU_DRA7_HIGH,
+	.gpu.value[OPP_PLUS]	= VDD_GPU_DRA7_PLUS,
 	.gpu.efuse.reg[OPP_NOM]	= STD_FUSE_OPP_VMIN_GPU_NOM,
 	.gpu.efuse.reg[OPP_OD]	= STD_FUSE_OPP_VMIN_GPU_OD,
 	.gpu.efuse.reg[OPP_HIGH]	= STD_FUSE_OPP_VMIN_GPU_HIGH,
+	.gpu.efuse.reg[OPP_PLUS]	= STD_FUSE_OPP_VMIN_GPU_PLUS,
 	.gpu.efuse.reg_bits	= DRA752_EFUSE_REGBITS,
 	.gpu.addr	= LP87565_REG_ADDR_BUCK23,
 	.gpu.pmic	= &lp87565,
@@ -495,9 +499,11 @@ struct vcores_data dra722_volts = {
 	.gpu.value[OPP_NOM]	= VDD_GPU_DRA7_NOM,
 	.gpu.value[OPP_OD]	= VDD_GPU_DRA7_OD,
 	.gpu.value[OPP_HIGH]	= VDD_GPU_DRA7_HIGH,
+	.gpu.value[OPP_PLUS]	= VDD_GPU_DRA7_PLUS,
 	.gpu.efuse.reg[OPP_NOM]	= STD_FUSE_OPP_VMIN_GPU_NOM,
 	.gpu.efuse.reg[OPP_OD]	= STD_FUSE_OPP_VMIN_GPU_OD,
 	.gpu.efuse.reg[OPP_HIGH]	= STD_FUSE_OPP_VMIN_GPU_HIGH,
+	.gpu.efuse.reg[OPP_PLUS]	= STD_FUSE_OPP_VMIN_GPU_PLUS,
 	.gpu.efuse.reg_bits = DRA752_EFUSE_REGBITS,
 	.gpu.addr	= TPS65917_REG_ADDR_SMPS3,
 	.gpu.pmic	= &tps659038,
@@ -596,6 +602,8 @@ int get_voltrail_opp(int rail_offset)
 		/* DRA71x supports only OPP_NOM for GPU */
 		if (board_is_dra71x_evm())
 			opp = OPP_NOM;
+		else if (!board_is_dra76x_evm() && opp == OPP_PLUS)
+		        opp = OPP_HIGH;
 		break;
 	case VOLT_EVE:
 		opp = DRA7_DSPEVE_OPP;
