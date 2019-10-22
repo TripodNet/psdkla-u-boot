@@ -22,8 +22,12 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
-#define IPU1_LOAD_ADDR	0xa0fff000
-#define IPU2_LOAD_ADDR	0xa17ff000
+#define IPU1_LOAD_ADDR         (0xa0fff000)
+#define MAX_REMOTECORE_BIN_SIZE (8 * 0x100000)
+
+#define IPU2_LOAD_ADDR         (IPU1_LOAD_ADDR + MAX_REMOTECORE_BIN_SIZE)
+#define DSP1_LOAD_ADDR         (IPU2_LOAD_ADDR + MAX_REMOTECORE_BIN_SIZE)
+#define DSP2_LOAD_ADDR         (DSP1_LOAD_ADDR + MAX_REMOTECORE_BIN_SIZE)
 
 __weak u32 omap_sys_boot_device(void)
 {
@@ -206,14 +210,14 @@ void spl_boot_ipu(void)
 	if (ret) {
 		debug("%s: IPU1 failed to initialize on rproc (%d)\n",
 		      __func__, ret);
-		goto skip_ipu;
+		goto skip_ipu1;
 	}
 
 	ret = rproc_load(0, IPU1_LOAD_ADDR, 0x2000000);
 	if (ret) {
 		debug("%s: IPU1 failed to load on rproc (%d)\n", __func__,
 		      ret);
-		goto skip_ipu;
+		goto skip_ipu1;
 	}
 
 	debug("Starting IPU1...\n");
@@ -221,29 +225,79 @@ void spl_boot_ipu(void)
 	ret = rproc_start(0);
 	if (ret) {
 		debug("%s: IPU1 failed to start (%d)\n", __func__, ret);
-		goto skip_ipu;
 	}
+
+skip_ipu1 :
 
 	ret = rproc_dev_init(1);
 	if (ret) {
 		debug("%s: IPU2 failed to initialize on rproc (%d)\n", __func__,
 		      ret);
-		goto skip_ipu;
+		goto skip_ipu2;
 	}
 
 	ret = rproc_load(1, IPU2_LOAD_ADDR, 0x2000000);
 	if (ret) {
 		debug("%s: IPU2 failed to load on rproc (%d)\n", __func__,
 		      ret);
-		goto skip_ipu;
+		goto skip_ipu2;
 	}
 
 	debug("Starting IPU2...\n");
 
 	ret = rproc_start(1);
-	if (ret)
+	if (ret) {
 		debug("%s: IPU2 failed to start (%d)\n", __func__, ret);
-skip_ipu:
+	}
+
+skip_ipu2 :
+
+#if defined(CONFIG_REMOTEPROC_TI_DSP)
+	ret = rproc_dev_init(2);
+	if (ret) {
+		debug("%s: DSP1 failed to initialize on rproc (%d)\n",
+		      __func__, ret);
+		goto skip_dsp1;
+	}
+
+	ret = rproc_load(2, DSP1_LOAD_ADDR, 0x2000000);
+	if (ret) {
+		debug("%s: DSP1 failed to load on rproc (%d)\n", __func__,
+		      ret);
+		goto skip_dsp1;
+	}
+
+	debug("Starting DSP1...\n");
+
+	ret = rproc_start(2);
+	if (ret) {
+		debug("%s: DSP1 failed to start (%d)\n", __func__, ret);
+	}
+
+skip_dsp1 :
+
+	ret = rproc_dev_init(3);
+	if (ret) {
+		debug("%s: DSP2 failed to initialize on rproc (%d)\n",
+		      __func__, ret);
+		goto skip_dsp2;
+	}
+
+	ret = rproc_load(3, DSP2_LOAD_ADDR, 0x2000000);
+	if (ret) {
+		debug("%s: DSP2 failed to load on rproc (%d)\n", __func__,
+		      ret);
+		goto skip_dsp2;
+	}
+
+	debug("Starting DSP2...\n");
+
+	ret = rproc_start(3);
+	if (ret)
+		debug("%s: DSP2 failed to start (%d)\n", __func__, ret);
+#endif
+
+skip_dsp2 :
 
 	return;
 #endif
