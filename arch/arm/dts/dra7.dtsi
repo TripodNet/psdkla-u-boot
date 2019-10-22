@@ -43,6 +43,7 @@
 		spi0 = &qspi;
 		remoteproc0 = &ipu1;
 		remoteproc1 = &ipu2;
+		remoteproc2 = &dsp1;
 	};
 
 	timer {
@@ -291,6 +292,12 @@
 					compatible = "ti,dra7-reset";
 					reg = <0x910 0x8>;
 					ti,nresets = <3>;
+					#reset-cells = <1>;
+				};
+				dsp1_rst: dsp1_rst@410 {
+					compatible = "ti,dra7-reset";
+					reg = <0x410 0x8>;
+					ti,nresets = <2>;
 					#reset-cells = <1>;
 				};
 			};
@@ -2074,6 +2081,20 @@
 			ti,rproc-standby-info = <0x4a008920>;
 			timers = <&timer3>;
 			watchdog-timers = <&timer4>, <&timer9>;
+		};
+
+		dsp1: dsp@40800000 {
+			compatible = "ti,dra7-dsp";
+			reg = <0x40800000 0x48000>,
+			      <0x40e00000 0x8000>,
+			      <0x40f00000 0x8000>;
+			reg-names = "l2ram", "l1pram", "l1dram";
+			ti,hwmods = "dsp1";
+			resets = <&dsp1_rst 0>, <&dsp1_rst 1>;
+			iommus = <&mmu0_dsp1>, <&mmu1_dsp1>;
+			ti,rproc-standby-info = <0x4a005420>;
+			timers = <&timer5>;
+			watchdog-timers = <&timer10>;
 		};
 	};
 

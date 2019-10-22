@@ -21,6 +21,13 @@
 		};
 	};
 
+	aliases {
+		remoteproc0 = &ipu1;
+		remoteproc1 = &ipu2;
+		remoteproc2 = &dsp1;
+		remoteproc3 = &dsp2;
+	};
+
 	pmu {
 		compatible = "arm,cortex-a15-pmu";
 		interrupt-parent = <&wakeupgen>;
@@ -33,6 +40,7 @@
 			compatible = "syscon";
 			reg = <0x41500000 0x100>;
 		};
+
 
 		omap_dwc3_4: omap_dwc3_4@48940000 {
 			compatible = "ti,dwc3";
@@ -77,11 +85,35 @@
 			ti,syscon-mmuconfig = <&dsp2_system 0x1>;
 			status = "disabled";
 		};
+
+		dsp2: dsp@41000000 {
+			compatible = "ti,dra7-dsp";
+			reg = <0x41000000 0x48000>,
+			      <0x41600000 0x8000>,
+			      <0x41700000 0x8000>;
+			reg-names = "l2ram", "l1pram", "l1dram";
+			ti,hwmods = "dsp2";
+			resets = <&dsp2_rst 0>, <&dsp2_rst 1>;
+			iommus = <&mmu0_dsp2>, <&mmu1_dsp2>;
+			ti,rproc-standby-info = <0x4a005620>;
+			timers = <&timer6>;
+			watchdog-timers = <&timer13>;
+		};
+
 	};
 };
 
 &cpu0_opp_table {
 	opp-shared;
+};
+
+&prm {
+	dsp2_rst: dsp2_rst@1B10 {
+		compatible = "ti,dra7-reset";
+		reg = <0x1B10 0x8>;
+		ti,nresets = <2>;
+		#reset-cells = <1>;
+	};
 };
 
 &dss {
