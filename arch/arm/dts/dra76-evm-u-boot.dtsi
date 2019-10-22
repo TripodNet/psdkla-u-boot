@@ -5,6 +5,8 @@
 
 #include "omap5-u-boot.dtsi"
 #include "dra7-ipu-common-early-boot.dtsi"
+#include "dra7-dsp-common-early-boot.dtsi"
+#include "dra74x-dsp-common-early-boot.dtsi"
 
 &cpsw_emac0 {
 	phy-handle = <&dp83867_0>;
