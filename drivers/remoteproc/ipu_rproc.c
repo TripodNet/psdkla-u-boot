@@ -11,100 +11,13 @@
 #include <common.h>
 #include <dm.h>
 #include <elf.h>
-#include <environment.h>
-#include <dm/of_access.h>
-#include <fs_loader.h>
-#include <remoteproc.h>
-#include <errno.h>
-#include <clk.h>
-#include <reset.h>
-#include <regmap.h>
-#include <syscon.h>
-#include <asm/io.h>
-#include <misc.h>
-#include <power-domain.h>
-#include <timer.h>
-#include <fs.h>
-#include <spl.h>
-#include <timer.h>
-#include <reset.h>
-#include <linux/bitmap.h>
-
-#define IPU1_LOAD_ADDR         (0xa0fff000)
-#define MAX_REMOTECORE_BIN_SIZE (8 * 0x100000)
+#include "ti_dra7x_rproc.h"
 
 enum ipu_num {
 	IPU1 = 0,
 	IPU2,
 	RPROC_END_ENUMS,
 };
-
-#define IPU2_LOAD_ADDR         (IPU1_LOAD_ADDR + MAX_REMOTECORE_BIN_SIZE)
-
-#define PAGE_SHIFT			12
-#define PAGESIZE_1M                          0x0
-#define PAGESIZE_64K                         0x1
-#define PAGESIZE_4K                          0x2
-#define PAGESIZE_16M                         0x3
-#define LE                                   0
-#define BE                                   1
-#define ELEMSIZE_8                           0x0
-#define ELEMSIZE_16                          0x1
-#define ELEMSIZE_32                          0x2
-#define MIXED_TLB                            0x0
-#define MIXED_CPU                            0x1
-
-#define PGT_SMALLPAGE_SIZE                   0x00001000
-#define PGT_LARGEPAGE_SIZE                   0x00010000
-#define PGT_SECTION_SIZE                     0x00100000
-#define PGT_SUPERSECTION_SIZE                0x01000000
-
-#define PGT_L1_DESC_PAGE                     0x00001
-#define PGT_L1_DESC_SECTION                  0x00002
-#define PGT_L1_DESC_SUPERSECTION             0x40002
-
-#define PGT_L1_DESC_PAGE_MASK                0xfffffC00
-#define PGT_L1_DESC_SECTION_MASK             0xfff00000
-#define PGT_L1_DESC_SUPERSECTION_MASK        0xff000000
-
-#define PGT_L1_DESC_SMALLPAGE_INDEX_SHIFT    12
-#define PGT_L1_DESC_LARGEPAGE_INDEX_SHIFT    16
-#define PGT_L1_DESC_SECTION_INDEX_SHIFT      20
-#define PGT_L1_DESC_SUPERSECTION_INDEX_SHIFT 24
-
-#define PGT_L2_DESC_SMALLPAGE               0x02
-#define PGT_L2_DESC_LARGEPAGE               0x01
-
-#define PGT_L2_DESC_SMALLPAGE_MASK          0xfffff000
-#define PGT_L2_DESC_LARGEPAGE_MASK          0xffff0000
-
-#define DRA7_RPROC_CMA_BASE_IPU1             0x9d000000
-#define DRA7_RPROC_CMA_BASE_IPU2             0x95800000
-#define DRA7_RPROC_CMA_BASE_DSP1             0x99000000
-#define DRA7_RPROC_CMA_BASE_DSP2             0x9f000000
-
-#define DRA7_RPROC_CMA_SIZE_IPU1             0x02000000
-#define DRA7_RPROC_CMA_SIZE_IPU2             0x03800000
-#define DRA7_RPROC_CMA_SIZE_DSP1             0x04000000
-#define DRA7_RPROC_CMA_SIZE_DSP2             0x00800000
-
-#define DRA7_PGTBL_BASE_IPU1                 0x95700000
-#define DRA7_PGTBL_BASE_IPU2                 0x95740000
-
-/*
- * The memory for the page tables (256 KB per IPU) is placed just before
- * the carveout memories for the remote processors. 16 KB of memory is
- * needed for the L1 page table (4096 entries * 4 bytes per 1 MB section).
- * Any smaller page (64 KB or 4 KB) entries are supported through L2 page
- * tables (1 KB per table). The remaining 240 KB can provide support for
- * 240 L2 page tables. Any remoteproc firmware image requiring more than
- * 240 L2 page table entries would need more memory to be reserved.
- */
-#define PAGE_TABLE_SIZE_L1 (0x00004000)
-#define PAGE_TABLE_SIZE_L2 (0x400)
-#define MAX_NUM_L2_PAGE_TABLES (240)
-#define PAGE_TABLE_SIZE_L2_TOTAL (MAX_NUM_L2_PAGE_TABLES * PAGE_TABLE_SIZE_L2)
-#define PAGE_TABLE_SIZE (PAGE_TABLE_SIZE_L1 + (PAGE_TABLE_SIZE_L2_TOTAL))
 
 /**
  * struct omap_rproc_mem - internal memory structure
@@ -155,7 +68,7 @@ unsigned long mem_count;
 unsigned int pgtable_l2_map[MAX_NUM_L2_PAGE_TABLES];
 unsigned int pgtable_l2_cnt;
 
-void *ipu_alloc_mem(struct udevice *dev, unsigned long len, unsigned long align)
+void *alloc_mem(struct udevice *dev, unsigned long len, unsigned long align)
 {
 	unsigned long mask;
 	unsigned long pageno;
@@ -553,7 +466,7 @@ static const struct dm_rproc_ops ipu_ops = {
 	.load = ipu_load,
 	.add_res = ipu_add_res,
 	.config_pagetable = ipu_config_pagetable,
-	.alloc_mem = ipu_alloc_mem,
+	.alloc_mem = alloc_mem,
 };
 
 /*
@@ -777,9 +690,9 @@ static int ipu_probe(struct udevice *dev)
 	}
 
 	INIT_LIST_HEAD(&priv->mappings);
-	spl_pre_boot_core(dev, priv->id);
+	ret = spl_pre_boot_core(dev, priv->id);
 
-	return 0;
+	return ret;
 }
 
 static const struct udevice_id ipu_ids[] = {
