@@ -22,12 +22,17 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
-#define IPU1_LOAD_ADDR         (0xa0fff000)
-#define MAX_REMOTECORE_BIN_SIZE (8 * 0x100000)
+#define IPU1_LOAD_ADDR         (0xb4000000)
+#define MAX_REMOTECORE_BIN_SIZE (12 * 0x100000)
 
 #define IPU2_LOAD_ADDR         (IPU1_LOAD_ADDR + MAX_REMOTECORE_BIN_SIZE)
 #define DSP1_LOAD_ADDR         (IPU2_LOAD_ADDR + MAX_REMOTECORE_BIN_SIZE)
 #define DSP2_LOAD_ADDR         (DSP1_LOAD_ADDR + MAX_REMOTECORE_BIN_SIZE)
+
+#define IPU1_UNCOMP_LOAD_ADDR         (DSP2_LOAD_ADDR + MAX_REMOTECORE_BIN_SIZE)
+#define IPU2_UNCOMP_LOAD_ADDR         (IPU1_UNCOMP_LOAD_ADDR + MAX_REMOTECORE_BIN_SIZE)
+#define DSP1_UNCOMP_LOAD_ADDR         (IPU2_UNCOMP_LOAD_ADDR + MAX_REMOTECORE_BIN_SIZE)
+#define DSP2_UNCOMP_LOAD_ADDR         (DSP1_UNCOMP_LOAD_ADDR + MAX_REMOTECORE_BIN_SIZE)
 
 __weak u32 omap_sys_boot_device(void)
 {
@@ -213,7 +218,7 @@ void spl_boot_ipu(void)
 		goto skip_ipu1;
 	}
 
-	ret = rproc_load(0, IPU1_LOAD_ADDR, 0x2000000);
+	ret = rproc_load(0, IPU1_UNCOMP_LOAD_ADDR, 0x2000000);
 	if (ret) {
 		debug("%s: IPU1 failed to load on rproc (%d)\n", __func__,
 		      ret);
@@ -236,7 +241,7 @@ skip_ipu1 :
 		goto skip_ipu2;
 	}
 
-	ret = rproc_load(1, IPU2_LOAD_ADDR, 0x2000000);
+	ret = rproc_load(1, IPU2_UNCOMP_LOAD_ADDR, 0x2000000);
 	if (ret) {
 		debug("%s: IPU2 failed to load on rproc (%d)\n", __func__,
 		      ret);
@@ -260,7 +265,7 @@ skip_ipu2 :
 		goto skip_dsp1;
 	}
 
-	ret = rproc_load(2, DSP1_LOAD_ADDR, 0x2000000);
+	ret = rproc_load(2, DSP1_UNCOMP_LOAD_ADDR, 0x2000000);
 	if (ret) {
 		debug("%s: DSP1 failed to load on rproc (%d)\n", __func__,
 		      ret);
@@ -283,7 +288,7 @@ skip_dsp1 :
 		goto skip_dsp2;
 	}
 
-	ret = rproc_load(3, DSP2_LOAD_ADDR, 0x2000000);
+	ret = rproc_load(3, DSP2_UNCOMP_LOAD_ADDR, 0x2000000);
 	if (ret) {
 		debug("%s: DSP2 failed to load on rproc (%d)\n", __func__,
 		      ret);

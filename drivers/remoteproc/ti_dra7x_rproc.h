@@ -104,12 +104,17 @@
 #define CM_IPU_TIMER7_CLKCTRL        (IPU_CM_CORE_AON + 0x68)
 #define CM_IPU_TIMER8_CLKCTRL        (IPU_CM_CORE_AON + 0x70)
 
-#define IPU1_LOAD_ADDR         (0xa0fff000)
-#define MAX_REMOTECORE_BIN_SIZE (8 * 0x100000)
+#define IPU1_LOAD_ADDR         (0xb4000000)
+#define MAX_REMOTECORE_BIN_SIZE (12 * 0x100000)
 
 #define IPU2_LOAD_ADDR         (IPU1_LOAD_ADDR + MAX_REMOTECORE_BIN_SIZE)
 #define DSP1_LOAD_ADDR         (IPU2_LOAD_ADDR + MAX_REMOTECORE_BIN_SIZE)
 #define DSP2_LOAD_ADDR         (DSP1_LOAD_ADDR + MAX_REMOTECORE_BIN_SIZE)
+
+#define IPU1_UNCOMP_LOAD_ADDR         (DSP2_LOAD_ADDR + MAX_REMOTECORE_BIN_SIZE)
+#define IPU2_UNCOMP_LOAD_ADDR         (IPU1_UNCOMP_LOAD_ADDR + MAX_REMOTECORE_BIN_SIZE)
+#define DSP1_UNCOMP_LOAD_ADDR         (IPU2_UNCOMP_LOAD_ADDR + MAX_REMOTECORE_BIN_SIZE)
+#define DSP2_UNCOMP_LOAD_ADDR         (DSP1_UNCOMP_LOAD_ADDR + MAX_REMOTECORE_BIN_SIZE)
 
 #define PAGE_SHIFT			12
 #define PAGESIZE_1M                          0x0
@@ -148,20 +153,20 @@
 #define PGT_L2_DESC_SMALLPAGE_MASK          0xfffff000
 #define PGT_L2_DESC_LARGEPAGE_MASK          0xffff0000
 
-#define DRA7_RPROC_CMA_BASE_IPU1             0x9d000000
-#define DRA7_RPROC_CMA_BASE_IPU2             0x95800000
-#define DRA7_RPROC_CMA_BASE_DSP1             0x99000000
-#define DRA7_RPROC_CMA_BASE_DSP2             0x9f000000
+#define DRA7_RPROC_CMA_BASE_IPU1             0x9e000000
+#define DRA7_RPROC_CMA_BASE_IPU2             0x99000000
+#define DRA7_RPROC_CMA_BASE_DSP1             0xA1000000
+#define DRA7_RPROC_CMA_BASE_DSP2             0xA3000000
 
 #define DRA7_RPROC_CMA_SIZE_IPU1             0x02000000
-#define DRA7_RPROC_CMA_SIZE_IPU2             0x03800000
-#define DRA7_RPROC_CMA_SIZE_DSP1             0x04000000
-#define DRA7_RPROC_CMA_SIZE_DSP2             0x00800000
+#define DRA7_RPROC_CMA_SIZE_IPU2             0x05000000
+#define DRA7_RPROC_CMA_SIZE_DSP1             0x02000000
+#define DRA7_RPROC_CMA_SIZE_DSP2             0x02000000
 
-#define DRA7_PGTBL_BASE_IPU1                 0x95700000
-#define DRA7_PGTBL_BASE_IPU2                 0x95740000
-#define DRA7_PGTBL_BASE_DSP1                 0x95780000
-#define DRA7_PGTBL_BASE_DSP2                 0x957c0000
+#define DRA7_PGTBL_BASE_IPU1                 0xbfc00000
+#define DRA7_PGTBL_BASE_IPU2                 0xbfc08000
+#define DRA7_PGTBL_BASE_DSP1                 0xbfc10000
+#define DRA7_PGTBL_BASE_DSP2                 0xbfc18000
 
 /*
  * The memory for the page tables (256 KB per IPU) is placed just before

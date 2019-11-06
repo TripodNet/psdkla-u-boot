@@ -12,6 +12,7 @@
 #include <dm.h>
 #include <elf.h>
 #include "ti_dra7x_rproc.h"
+#include <linux/lzo.h>
 
 enum dsp_num {
 	DSP1= 0,
@@ -365,7 +366,7 @@ static int dsp_start(struct udevice *dev)
 	if (cfg->config_peripherals)
 		cfg->config_peripherals(priv->id, cfg);
 
-	addr = (priv->id == DSP1) ? DSP1_LOAD_ADDR : DSP2_LOAD_ADDR;
+	addr = (priv->id == DSP1) ? DSP1_UNCOMP_LOAD_ADDR : DSP2_UNCOMP_LOAD_ADDR;
 
 	cfg->entry_point = rproc_elf_get_boot_addr(dev, addr);
 
@@ -556,7 +557,7 @@ struct rproc dsp1_config = {
 	.mmu_base_addr = {0x40D01000, 0x40D02000},
 	.load_addr = DSP1_LOAD_ADDR,
 	.core_name = "DSP1",
-	.firmware_name = "dra7-dsp1-fw.xe66",
+	.firmware_name = "dra7-dsp1-fw.lzop",
 	.start_clocks = dsp_start_clocks,
 	.start_core = dsp_start_core,
 	.config_mmu = dsp_config_mmu,
@@ -572,7 +573,7 @@ struct rproc dsp2_config = {
 	.mmu_base_addr = {0x41501000, 0x41502000},
 	.load_addr = DSP2_LOAD_ADDR,
 	.core_name = "DSP2",
-	.firmware_name = "dra7-dsp2-fw.xe66",
+	.firmware_name = "dra7-dsp2-fw.lzop",
 	.start_clocks = dsp_start_clocks,
 	.start_core = dsp_start_core,
 	.config_mmu = dsp_config_mmu,
@@ -590,8 +591,24 @@ u32 spl_pre_boot_dsp_core(struct udevice *dev, u32 core_id)
 	struct rproc *cfg = NULL;
 	unsigned long load_elf_status = 0;
 	int tablesz;
+	u32 decomp_len, inp_len;
+	unsigned long uncomp_addr;
 
 	cfg = dsp_rproc_cfg_arr[core_id];
+
+	/* Check if a compressed image is present */
+	decomp_len = MAX_REMOTECORE_BIN_SIZE;
+	inp_len = MAX_REMOTECORE_BIN_SIZE;
+
+	uncomp_addr = (core_id == DSP1) ? DSP1_UNCOMP_LOAD_ADDR : DSP2_UNCOMP_LOAD_ADDR;
+
+	if(lzop_decompress((u8 *) cfg->load_addr , inp_len,
+					(u8 *) uncomp_addr, &decomp_len) != 0)
+		return 1;
+
+	/* Now uncompressed address is new load address */
+	cfg->load_addr = uncomp_addr;
+
 	/*
 	 * Check for valid elf image
 	 */

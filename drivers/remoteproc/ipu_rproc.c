@@ -12,6 +12,7 @@
 #include <dm.h>
 #include <elf.h>
 #include "ti_dra7x_rproc.h"
+#include <linux/lzo.h>
 
 enum ipu_num {
 	IPU1 = 0,
@@ -521,7 +522,7 @@ struct rproc ipu1_config = {
 	.mmu_base_addr = {0x58882000, 0},
 	.load_addr = IPU1_LOAD_ADDR,
 	.core_name = "IPU1",
-	.firmware_name = "dra7-ipu1-fw.xem4",
+	.firmware_name = "dra7-ipu1-fw.lzop",
 	.config_mmu = ipu_config_mmu,
 	.config_peripherals = ipu1_config_peripherals,
 	.intmem_to_l3_mapping = &ipu1_intmem_to_l3_mapping
@@ -535,7 +536,7 @@ struct rproc ipu2_config = {
 	.mmu_base_addr = {0x55082000, 0},
 	.load_addr = IPU2_LOAD_ADDR,
 	.core_name = "IPU2",
-	.firmware_name = "dra7-ipu2-fw.xem4",
+	.firmware_name = "dra7-ipu2-fw.lzop",
 	.config_mmu = ipu_config_mmu,
 	.config_peripherals = ipu2_config_peripherals,
 	.intmem_to_l3_mapping = &ipu2_intmem_to_l3_mapping
@@ -551,9 +552,24 @@ u32 spl_pre_boot_core(struct udevice *dev, u32 core_id)
 	struct rproc *cfg = NULL;
 	unsigned long load_elf_status = 0;
 	int tablesz;
+	u32 decomp_len, inp_len;
+	unsigned long uncomp_addr;
 
 	cfg = rproc_cfg_arr[core_id];
-	/*
+
+	/* Check if a compressed image is present */
+	decomp_len = MAX_REMOTECORE_BIN_SIZE;
+	inp_len = MAX_REMOTECORE_BIN_SIZE;
+
+	uncomp_addr = (core_id == IPU1) ? IPU1_UNCOMP_LOAD_ADDR : IPU2_UNCOMP_LOAD_ADDR;
+
+	if(lzop_decompress((u8 *) cfg->load_addr, inp_len,
+					(u8 *) uncomp_addr, &decomp_len) != 0)
+		return 1;
+
+	/* Now uncompressed address is new load address */
+	cfg->load_addr = uncomp_addr;
+	 /*
 	 * Check for valid elf image
 	 */
 	if (!valid_elf_image(cfg->load_addr))
